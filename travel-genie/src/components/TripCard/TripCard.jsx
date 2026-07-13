@@ -1,15 +1,29 @@
+
 export default function TripCard({ trip }) {
+
   return (
-    <div className="bg-white shadow-md rounded-xl p-5">
-      <h3 className="text-xl font-bold text-blue-600">{trip.destination}</h3>
+    <div className="bg-white shadow-lg rounded-xl p-6">
 
-      <p className="mt-2">Budget: ${trip.budget}</p>
+      <h2 className="text-2xl font-bold text-blue-600">
+        {trip.destination}
+      </h2>
 
-      <p className="text-gray-500">{trip.dates}</p>
+      <p className="mt-2">
+        Budget: ${trip.budget}
+      </p>
 
-      <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">
-        View Trip
-      </button>
+      <p>
+        Travel Style: {trip.travelStyle}
+      </p>
+
+      <p>
+        Start Date: {trip.dates.start}
+      </p>
+
+      <p>
+        End Date: {trip.dates.end}
+      </p>
+
     </div>
   );
 }

@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { TripContext } from "./TripContext";
+import { getTrips, saveTrips } from "../services/localStorage";
 
 export default function TripProvider({ children }) {
-  const [trips, setTrips] = useState([]);
+  const [trips, setTrips] = useState(() => getTrips());
 
   const addTrip = (trip) => {
-    setTrips((previousTrips) => [...previousTrips, trip]);
+    const updatedTrips = [...trips, trip];
+
+    setTrips(updatedTrips);
+
+    saveTrips(updatedTrips);
   };
 
   return (
