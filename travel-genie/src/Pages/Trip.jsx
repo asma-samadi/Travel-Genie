@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
-import { useContext } from "react";
+import { useContext , useState} from "react";
 import { TripContext } from "../context/TripContext";
+import { generateAIResponse } from "../services/ai";
+import { itineraryPrompt } from "../utils/prompts";
 
 export default function Trip() {
   const { id } = useParams();
@@ -9,9 +11,28 @@ export default function Trip() {
 
   const trip = trips.find((trip) => trip.id === id);
 
+  const [itinerary, setItinerary] = useState('');
+  const [loading, setLoading] = useState(false);
+
   if (!trip) {
     return <h1 className="text-center text-3xl mt-20">Trip Not Found</h1>;
   }
+
+  const handleGenerateItinerary = async () => {
+    setLoading(true);
+
+    try {
+      const prompt = itineraryPrompt(trip);
+
+      const result = await generateAIResponse(prompt);
+
+      setItinerary(result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="py-16 px-5">
@@ -22,16 +43,20 @@ export default function Trip() {
 
         <p>Travel Style: {trip.travelStyle}</p>
 
-        <p>
-          Start:
-          {trip.dates.start}
-        </p>
+        <p>Start: {trip.dates.start}</p>
 
-        <p>
-          End:
-          {trip.dates.end}
-        </p>
+        <p>End: {trip.dates.end}</p>
+
+        <button
+          onClick={handleGenerateItinerary}
+          className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg"
+        >
+          {loading ? "Generating..." : "Generate AI Itinerary"}
+        </button>
       </div>
+
+      <div className="mt-10 whitespace-pre-line bg-white p-6 rounded-xl shadow">
+  {itinerary}
+</div>
     </div>
-  );
-}
+  );};

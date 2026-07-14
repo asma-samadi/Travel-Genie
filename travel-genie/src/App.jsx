@@ -12,10 +12,7 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/saved" element={<SavedTrips />} />
-        <Route
- path="/trip/:id"
- element={<Trip />}
-/>
+        <Route path="/trip/:id" element={<Trip />} />
       </Route>
     </Routes>
   );
