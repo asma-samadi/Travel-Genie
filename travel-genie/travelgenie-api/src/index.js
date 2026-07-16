@@ -31,8 +31,10 @@ export default {
 				},
 
 				body: JSON.stringify({
-					model: 'gpt-oss-20b:free',
-
+					model: 'openai/gpt-oss-20b:free',
+					response_format: {
+						type: 'json_object',
+					},
 					messages: [
 						{
 							role: 'user',
@@ -44,7 +46,7 @@ export default {
 
 			const data = await response.json();
 
-			console.log(data);
+			console.log(data.choices[0].message.content);
 
 			if (data.error) {
 				return Response.json(

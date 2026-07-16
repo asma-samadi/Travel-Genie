@@ -4,9 +4,7 @@ export async function generateAIResponse(prompt) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      prompt,
-    }),
+    body: JSON.stringify({ prompt }),
   });
 
   const data = await response.json();

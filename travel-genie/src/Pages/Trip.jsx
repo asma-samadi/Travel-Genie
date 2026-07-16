@@ -3,6 +3,7 @@ import { useContext , useState} from "react";
 import { TripContext } from "../context/TripContext";
 import { generateAIResponse } from "../services/ai";
 import { itineraryPrompt } from "../utils/prompts";
+import  Itinerary  from "../components/Itinerary/Itinerary";
 
 export default function Trip() {
   const { id } = useParams();
@@ -49,14 +50,13 @@ export default function Trip() {
 
         <button
           onClick={handleGenerateItinerary}
-          className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg"
+          disabled={loading}
+          className="mt-6 px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition disabled:opacity-50"
         >
-          {loading ? "Generating..." : "Generate AI Itinerary"}
+          {loading ? "Generating..." : "✨ Generate AI Itinerary"}
         </button>
       </div>
 
-      <div className="mt-10 whitespace-pre-line bg-white p-6 rounded-xl shadow">
-  {itinerary}
-</div>
+      <Itinerary itinerary={itinerary} />
     </div>
   );};

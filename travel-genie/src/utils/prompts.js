@@ -1,27 +1,38 @@
 export function itineraryPrompt(trip) {
   return `
-Create a travel itinerary for ${trip.destination}.
+Create a ${trip.travelStyle} travel itinerary for ${trip.destination}.
 
-Budget: ${trip.budget}
-Start: ${trip.dates.start}
-End: ${trip.dates.end}
+Budget: $${trip.budget}
+Start Date: ${trip.dates.start}
+End Date: ${trip.dates.end}
 
-Format exactly like this:
+Write a clear travel itinerary.
+
+Use exactly this format:
 
 Day 1
-Notes: Short description
+Notes:
+Arrival and explore the city.
+
 Activities:
 - Activity 1
 - Activity 2
+- Activity 3
 
 Day 2
-Notes: Short description
+Notes:
+Short description.
+
 Activities:
 - Activity 1
 - Activity 2
+- Activity 3
 
-Do not use JSON.
-Do not use special characters.
-Do not explain anything else.
+Continue until the trip ends.
+
+Do NOT use JSON.
+Do NOT use markdown.
+Do NOT use code blocks.
+Return only the itinerary.
 `;
 }

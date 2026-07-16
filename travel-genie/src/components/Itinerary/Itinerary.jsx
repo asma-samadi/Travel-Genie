@@ -1,45 +1,40 @@
 export default function Itinerary({ itinerary }) {
-  return (
-    <section className="mt-10">
+  if (!itinerary) return null;
 
-      <h2 className="text-3xl font-bold mb-6">
-        AI Itinerary
+  const days = itinerary.split(/Day\s+\d+/).filter(Boolean);
+
+  const dayNumbers = [...itinerary.matchAll(/Day\s+(\d+)/g)].map(
+    (match) => match[1],
+  );
+
+  return (
+    <section className="max-w-6xl mx-auto mt-12">
+      <h2 className="text-4xl font-bold text-center mb-10">
+        ✈️ AI Travel Itinerary
       </h2>
 
-      <div className="space-y-6">
-        {itinerary.map((day) => (
+      <div className="grid gap-8 md:grid-cols-2">
+        {days.map((content, index) => (
           <div
-            key={day.day}
-            className="bg-white rounded-2xl shadow-md p-6 border"
+            key={index}
+            className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-2xl transition duration-300"
           >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-2xl font-bold text-blue-600">
+                Day {dayNumbers[index]}
+              </h3>
 
-            <h3 className="text-2xl font-bold mb-3">
-              Day {day.day}
-            </h3>
+              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+                Travel
+              </span>
+            </div>
 
-            <p className="text-gray-600 mb-4">
-              {day.notes}
-            </p>
-
-            <h4 className="font-semibold mb-2">
-              Activities:
-            </h4>
-
-            <ul className="space-y-2">
-              {day.activities.map((activity, index) => (
-                <li
-                  key={index}
-                  className="bg-gray-100 rounded-lg p-3"
-                >
-                  {activity}
-                </li>
-              ))}
-            </ul>
-
+            <div className="whitespace-pre-wrap leading-8 text-gray-700">
+              {content.trim()}
+            </div>
           </div>
         ))}
       </div>
-
     </section>
   );
 }
