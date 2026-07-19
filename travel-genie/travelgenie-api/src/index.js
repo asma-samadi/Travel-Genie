@@ -31,10 +31,8 @@ export default {
 				},
 
 				body: JSON.stringify({
-					model: 'openai/gpt-oss-20b:free',
-					response_format: {
-						type: 'json_object',
-					},
+					model: 'meta-llama/llama-3.1-8b-instruct:free',
+
 					messages: [
 						{
 							role: 'user',
@@ -46,12 +44,16 @@ export default {
 
 			const data = await response.json();
 
-			console.log(data.choices[0].message.content);
+			console.log('OPENROUTER RESPONSE:');
+			console.log(data);
 
-			if (data.error) {
+			if (!data.choices || !data.choices[0]) {
+				console.log('OpenRouter Error:', data);
+
 				return Response.json(
 					{
-						error: data.error.message,
+						error: 'No AI response received',
+						details: data,
 					},
 					{
 						status: 500,
@@ -60,9 +62,11 @@ export default {
 				);
 			}
 
+			const aiText = data.choices[0].message.content;
+
 			return Response.json(
 				{
-					result: data.choices[0].message.content,
+					result: aiText,
 				},
 				{
 					headers: corsHeaders,

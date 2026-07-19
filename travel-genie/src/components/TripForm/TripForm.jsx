@@ -40,7 +40,12 @@ export default function TripForm() {
 
       itinerary: [],
 
-      estimatedCost: {},
+      estimatedCost: {
+        accommodation: 100,
+        food: 90,
+        transport: 200,
+        activities: 2903,
+      },
 
       packingList: [],
     };
