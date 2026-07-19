@@ -2,22 +2,11 @@ import { useContext } from "react";
 import { TripContext } from "../context/TripContext";
 
 import SavedTripCard from "../components/SavedTrip/SavedTripCard";
-import EmptyTrips from "../components/SavedTrip/EmptyTrips";
 
-export default function SavedTrips() {
+export default function FavoriteTrips() {
   const { trips, deleteTrip, toggleFavorite } = useContext(TripContext);
 
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this trip?",
-    );
-
-    if (!confirmDelete) {
-      return;
-    }
-
-    deleteTrip(id);
-  };
+  const favoriteTrips = trips.filter((trip) => trip.favorite);
 
   return (
     <section
@@ -43,23 +32,31 @@ font-bold
 dark:text-white
 "
         >
-          My Saved Trips
+          ⭐ Favorite Trips
         </h1>
 
         <p
           className="
+text-center
 mt-4
 mb-12
-text-center
 text-gray-600
 dark:text-gray-300
 "
         >
-          Manage all your planned adventures in one place.
+          Your most loved adventures
         </p>
 
-        {trips.length === 0 ? (
-          <EmptyTrips />
+        {favoriteTrips.length === 0 ? (
+          <div
+            className="
+text-center
+text-gray-500
+dark:text-gray-300
+"
+          >
+            No favorite trips yet.
+          </div>
         ) : (
           <div
             className="
@@ -69,18 +66,13 @@ md:grid-cols-2
 lg:grid-cols-3
 "
           >
-            {trips.map((trip) => (
+            {favoriteTrips.map((trip) => (
               <SavedTripCard
-
-key={trip.id}
-
-trip={trip}
-
-onDelete={handleDelete}
-
-onFavorite={toggleFavorite}
-
-/>
+                key={trip.id}
+                trip={trip}
+                onDelete={deleteTrip}
+                onFavorite={toggleFavorite}
+              />
             ))}
           </div>
         )}

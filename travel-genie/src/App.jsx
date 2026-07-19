@@ -16,6 +16,10 @@ import TripForm from "./components/TripForm/TripForm";
 import Budget from "./components/Budget/Budget";
 import Packing from "./components/Packing/Packing";
 
+import EditTrip from "./pages/EditTrip";
+
+import FavoriteTrips from "./pages/FavoriteTrips";
+
 function App() {
   return (
     <>
@@ -31,6 +35,8 @@ function App() {
           <Route path="/create-trip" element={<TripForm />} />
           <Route path="/budget" element={<Budget />} />
           <Route path="/packing" element={<Packing />} />
+          <Route path="/edit-trip/:id" element={<EditTrip />} />
+          <Route path="/favorites" element={<FavoriteTrips />} />
         </Route>
       </Routes>
     </>

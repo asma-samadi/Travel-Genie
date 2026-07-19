@@ -1,12 +1,7 @@
 import { Link } from "react-router-dom";
-import {
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaDollarSign,
-  FaTrash,
-} from "react-icons/fa";
+import { FaMapMarkerAlt, FaCalendarAlt, FaDollarSign } from "react-icons/fa";
 
-export default function SavedTripCard({ trip, onDelete }) {
+export default function SavedTripCard({ trip, onDelete, onFavorite }) {
   return (
     <div
       className="
@@ -21,7 +16,30 @@ export default function SavedTripCard({ trip, onDelete }) {
       dark:bg-[#1E293B]
       "
     >
-      <h3 className="text-2xl font-bold dark:text-white">{trip.destination}</h3>
+      <div className="flex items-center justify-between">
+        <h2
+          className="
+  text-2xl
+  font-bold
+  dark:text-white
+  "
+        >
+          {trip.destination}
+        </h2>
+
+        <button
+          onClick={() => onFavorite(trip.id)}
+          className="
+    p-1
+    rounded-full
+    hover:bg-yellow-100
+    dark:hover:bg-gray-700
+    transition
+    "
+        >
+          <span className="text-xl">{trip.favorite ? "⭐" : "☆"}</span>
+        </button>
+      </div>
 
       <div className="mt-5 space-y-3 text-gray-600 dark:text-gray-300">
         <p className="flex items-center gap-3">
@@ -39,35 +57,44 @@ export default function SavedTripCard({ trip, onDelete }) {
         </p>
       </div>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 grid grid-cols-3 gap-2">
         <Link
           to={`/trip/${trip.id}`}
           className="
-          flex-1
-          rounded-xl
-          bg-lime-500
-          py-3
-          text-center
-          font-semibold
-          text-black
-          hover:bg-lime-400
-          "
+rounded-xl
+bg-lime-500
+py-3
+text-center
+font-semibold
+text-black
+"
         >
           View
+        </Link>
+
+        <Link
+          to={`/edit-trip/${trip.id}`}
+          className="
+rounded-xl
+bg-blue-500
+py-3
+text-center
+font-semibold
+text-white
+"
+        >
+          Edit
         </Link>
 
         <button
           onClick={() => onDelete(trip.id)}
           className="
-          rounded-xl
-          bg-red-500
-          px-4
-          text-white
-          transition
-          hover:bg-red-600
-          "
+rounded-xl
+bg-red-500
+text-white
+"
         >
-          <FaTrash />
+          🗑
         </button>
       </div>
     </div>

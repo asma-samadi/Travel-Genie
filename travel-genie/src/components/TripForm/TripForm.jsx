@@ -71,6 +71,10 @@ export default function TripForm() {
 
         travelers: Number(formData.travelers),
 
+        favorite: false,
+
+        status: "completed",
+
         itinerary: [],
 
         estimatedCost: {
@@ -81,6 +85,7 @@ export default function TripForm() {
         },
 
         packingList: [],
+
       };
 
       const updatedTrips = [...trips, newTrip];
@@ -220,6 +225,23 @@ export default function TripForm() {
               </select>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={saveDraft}
+            className="
+w-full
+rounded-xl
+border
+border-lime-500
+py-3
+font-semibold
+text-lime-600
+hover:bg-lime-50
+"
+          >
+            Save as Draft
+          </button>
 
           <button
             type="submit"
