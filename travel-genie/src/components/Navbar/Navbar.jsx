@@ -32,8 +32,9 @@ export default function Navbar() {
           <NavLink to="/packing">Packing</NavLink>
 
           <NavLink to="/about">About</NavLink>
-          
+
           <NavLink to="/favorites">Favorites</NavLink>
+          <NavLink to="/drafts">Drafts</NavLink>
         </div>
 
         {/* Right Side */}

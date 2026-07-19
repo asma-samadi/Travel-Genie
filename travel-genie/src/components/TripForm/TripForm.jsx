@@ -111,6 +111,60 @@ export default function TripForm() {
     }
   };
 
+  const saveDraft = ()=>{
+
+
+const draftTrip = {
+
+id:uuidv4(),
+
+destination:formData.destination,
+
+budget:Number(formData.budget) || 0,
+
+
+dates:{
+start:formData.startDate,
+end:formData.endDate
+},
+
+
+travelStyle:formData.travelStyle,
+
+
+favorite:false,
+
+
+status:"draft",
+
+
+itinerary:[],
+
+
+packingList:[]
+
+
+};
+
+
+
+const updatedTrips=[
+...trips,
+draftTrip
+];
+
+
+addTrip(draftTrip);
+
+
+saveTrips(updatedTrips);
+
+
+
+alert("Trip saved as draft!");
+
+};
+
   return (
     <section className="bg-stone-50 py-20 dark:bg-[#0F172A]">
       <div className="mx-auto max-w-4xl rounded-3xl bg-white p-10 shadow-xl dark:bg-[#1E293B]">

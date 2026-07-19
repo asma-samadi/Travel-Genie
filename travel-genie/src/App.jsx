@@ -20,6 +20,8 @@ import EditTrip from "./pages/EditTrip";
 
 import FavoriteTrips from "./pages/FavoriteTrips";
 
+import DraftTrips from "./pages/DraftTrips";
+
 function App() {
   return (
     <>
@@ -37,6 +39,7 @@ function App() {
           <Route path="/packing" element={<Packing />} />
           <Route path="/edit-trip/:id" element={<EditTrip />} />
           <Route path="/favorites" element={<FavoriteTrips />} />
+          <Route path="/drafts" element={<DraftTrips />} />
         </Route>
       </Routes>
     </>
