@@ -1,80 +1,103 @@
 export default {
 	async fetch(request, env) {
 		const corsHeaders = {
-			'Access-Control-Allow-Origin': '*',
-			'Access-Control-Allow-Methods': 'POST, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type',
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Methods": "POST, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type",
 		};
 
-		if (request.method === 'OPTIONS') {
+
+		// Handle CORS preflight
+		if (request.method === "OPTIONS") {
 			return new Response(null, {
 				headers: corsHeaders,
 			});
 		}
 
-		if (request.method !== 'POST') {
-			return new Response('Method Not Allowed', {
+
+		// Only allow POST
+		if (request.method !== "POST") {
+			return new Response("Method Not Allowed", {
 				status: 405,
 				headers: corsHeaders,
 			});
 		}
 
+
 		try {
+
 			const { prompt } = await request.json();
 
-			const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-				method: 'POST',
 
-				headers: {
-					Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-					'Content-Type': 'application/json',
-				},
+			const response = await fetch(
+				"https://openrouter.ai/api/v1/chat/completions",
+				{
+					method: "POST",
 
-				body: JSON.stringify({
-					model: 'meta-llama/llama-3.1-8b-instruct:free',
+					headers: {
+						Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+						"Content-Type": "application/json",
+					},
 
-					messages: [
-						{
-							role: 'user',
-							content: prompt,
-						},
-					],
-				}),
-			});
+
+					body: JSON.stringify({
+
+						model: "nvidia/nemotron-3-super-120b-a12b:free",
+
+						messages: [
+							{
+								role: "user",
+								content: prompt,
+							},
+						],
+
+					}),
+				}
+			);
+
+
 
 			const data = await response.json();
 
-			console.log('OPENROUTER RESPONSE:');
+
+			console.log("OPENROUTER RESPONSE:");
 			console.log(data);
 
-			if (!data.choices || !data.choices[0]) {
-				console.log('OpenRouter Error:', data);
+
+
+			// Handle OpenRouter errors
+			if (data.error) {
 
 				return Response.json(
 					{
-						error: 'No AI response received',
-						details: data,
+						error: data.error.message,
 					},
 					{
 						status: 500,
 						headers: corsHeaders,
-					},
+					}
 				);
+
 			}
 
-			const aiText = data.choices[0].message.content;
 
+
+			// Send AI response back to React
 			return Response.json(
 				{
-					result: aiText,
+					choices: data.choices,
 				},
 				{
 					headers: corsHeaders,
-				},
+				}
 			);
 
+
+
 		} catch (error) {
-			console.log(error);
+
+			console.log("SERVER ERROR:", error);
+
 
 			return Response.json(
 				{
@@ -83,8 +106,9 @@ export default {
 				{
 					status: 500,
 					headers: corsHeaders,
-				},
+				}
 			);
+
 		}
 	},
 };
