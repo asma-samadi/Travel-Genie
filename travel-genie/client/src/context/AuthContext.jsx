@@ -1,99 +1,45 @@
-import {  useState } from "react";
-import { getUsers, saveUsers } from "../context/auth";
-import { AuthContext } from "./AuthContext";
+import { createContext, useContext, useState } from "react";
+import { loginUser } from "../api/django";
 
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("currentUser")) || null,
-  );
+  const [user, setUser] = useState(null);
 
-  function signup(name, email, password) {
-    const users = getUsers();
+  const login = async (credentials) => {
+    const data = await loginUser(credentials);
 
-    const exists = users.find(
-      (user) => user.email.toLowerCase() === email.toLowerCase(),
-    );
+    localStorage.setItem("access", data.access);
 
-    if (exists) {
-      alert("An account with this email already exists.");
-      return false;
-    }
+    localStorage.setItem("refresh", data.refresh);
 
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      password,
-      createdAt: new Date().toISOString(),
-      trips: [],
-    };
+    setUser(data);
 
-    users.push(newUser);
+    return data;
+  };
 
-    saveUsers(users);
+  const logout = () => {
 
-    setUser(newUser);
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
 
-    localStorage.setItem("currentUser", JSON.stringify(newUser));
+  setUser(null);
 
-    return true;
-  }
-
-  function login(email, password) {
-    const users = getUsers();
-
-    const foundUser = users.find(
-      (user) =>
-        user.email.toLowerCase().trim() === email.toLowerCase().trim() &&
-        user.password === password,
-    );
-
-    if (foundUser) {
-      setUser(foundUser);
-
-      localStorage.setItem("currentUser", JSON.stringify(foundUser));
-
-      return true;
-    }
-
-    return false;
-  }
-
-  function updateProfile(name) {
-    const updatedUser = {
-      ...user,
-      name: name,
-    };
-
-    setUser(updatedUser);
-
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-
-    const users = getUsers();
-
-    const updatedUsers = users.map((u) => (u.id === user.id ? updatedUser : u));
-
-    saveUsers(updatedUsers);
-  }
-
-  function logout() {
-    setUser(null);
-
-    localStorage.removeItem("currentUser");
-  }
+};
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        signup,
         login,
         logout,
-        updateProfile,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
 }

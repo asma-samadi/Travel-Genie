@@ -1,50 +1,143 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function Login() {
-  const { login } = useContext(AuthContext);
+import { useAuth } from "../context/AuthContext.jsx";
 
+function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
-  function handleLogin() {
-    const success = login(email, password);
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
 
-    if (success) {
-      navigate("/");
-    } else {
-      alert("Wrong email or password");
+  const [error, setError] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+
+        await login(formData);
+
+        navigate("/dashboard");
+
+    } catch(err) {
+
+        console.log("LOGIN ERROR:", err);
+
+        setError("Invalid username or password");
+
+    } finally {
+
+        setLoading(false);
+
     }
-  }
+
+};
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-white shadow-xl rounded-xl p-8 w-96">
-        <h1 className="text-3xl font-bold mb-6">Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#07111F]">
+      <form
+        onSubmit={handleSubmit}
+        className="
+        w-full
+        max-w-md
+        rounded-3xl
+        bg-white
+        dark:bg-[#111827]
+        p-8
+        shadow-xl
+        "
+      >
+        <h1
+          className="
+        text-3xl
+        font-bold
+        text-gray-900
+        dark:text-white
+        "
+        >
+          Welcome Back
+        </h1>
+
+        <p
+          className="
+        mt-2
+        text-gray-500
+        dark:text-gray-300
+        "
+        >
+          Login to continue your journey
+        </p>
+
+        {error && <p className="mt-4 text-red-500">{error}</p>}
 
         <input
-          className="border p-3 w-full mb-3"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          placeholder="Username"
+          className="
+          mt-6
+          w-full
+          rounded-xl
+          border
+          p-3
+          dark:bg-gray-800
+          dark:text-white
+          "
         />
 
         <input
-          className="border p-3 w-full mb-3"
-          placeholder="Password"
+          name="password"
           type="password"
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="Password"
+          className="
+          mt-4
+          w-full
+          rounded-xl
+          border
+          p-3
+          dark:bg-gray-800
+          dark:text-white
+          "
         />
 
         <button
-          onClick={handleLogin}
-          className="bg-blue-600 text-white px-5 py-3 rounded-lg w-full"
+          disabled={loading}
+          className="
+          mt-6
+          w-full
+          rounded-xl
+          bg-cyan-500
+          py-3
+          font-semibold
+          text-white
+          hover:bg-cyan-400
+          "
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
-      </div>
+      </form>
     </div>
   );
 }
+
+export default Login;
