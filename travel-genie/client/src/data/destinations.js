@@ -1,8 +1,6 @@
 import paris from "../assets/images/destinations/paris.jpg";
-import tokyo from "../assets/images/destinations/tokyo.jpg";
 import dubai from "../assets/images/destinations/dubai.jpg";
 import bali from "../assets/images/destinations/bali.jpg";
-import istanbul from "../assets/images/destinations/istanbul.jpg";
 import rome from "../assets/images/destinations/rome.jpg";
 
 const destinations = [
@@ -16,15 +14,6 @@ const destinations = [
     duration: "5-7 Days",
   },
 
-  {
-    id: 2,
-    name: "Tokyo",
-    country: "Japan",
-    image: tokyo,
-    description:
-      "Discover modern technology, traditions, temples, and amazing food.",
-    duration: "7-10 Days",
-  },
 
   {
     id: 3,
@@ -45,14 +34,6 @@ const destinations = [
     duration: "6-8 Days",
   },
 
-  {
-    id: 5,
-    name: "Istanbul",
-    country: "Turkey",
-    image: istanbul,
-    description: "Explore history, culture, and the beautiful Bosphorus.",
-    duration: "5 Days",
-  },
 
   {
     id: 6,

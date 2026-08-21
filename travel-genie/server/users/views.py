@@ -1,64 +1,36 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
+from .models import Profile
+from .serializers import RegisterSerializer, ProfileSerializer
 
 
-from django.contrib.auth.models import User
-
-
-from .serializers import (
-    UserSerializer,
-    RegisterSerializer
-)
-
-
-
-# Get all users
-@api_view(["GET"])
-def users_list(request):
-
-    users = User.objects.all()
-
-
-    serializer = UserSerializer(
-        users,
-        many=True
-    )
-
-
-    return Response(serializer.data)
-
-
-
-
-# Register new user
 @api_view(["POST"])
 def register_user(request):
 
-    serializer = RegisterSerializer(
-        data=request.data
-    )
-
+    serializer = RegisterSerializer(data=request.data)
 
     if serializer.is_valid():
-
         serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-        return Response(
+class ProfileView(APIView):
 
-            {
-                "message":
-                "User created successfully"
-            },
+    permission_classes = [IsAuthenticated]
 
-            status=status.HTTP_201_CREATED
+    def get(self, request):
+
+        profile, created = Profile.objects.get_or_create(
+            user=request.user
         )
 
+        serializer = ProfileSerializer(profile)
 
-    return Response(
-
-        serializer.errors,
-
-        status=status.HTTP_400_BAD_REQUEST
-    )
+        return Response(serializer.data)
+    

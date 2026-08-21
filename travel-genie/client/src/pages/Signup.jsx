@@ -1,9 +1,11 @@
 import { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const { signup } = useContext(AuthContext);
+
+  const { register } = useAuth();
 
   const navigate = useNavigate();
 

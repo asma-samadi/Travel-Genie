@@ -1,10 +1,15 @@
 import { createContext, useContext, useState } from "react";
+
 import { loginUser } from "../api/django";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const token = localStorage.getItem("access");
+
+    return token ? { token } : null;
+  });
 
   const login = async (credentials) => {
     const data = await loginUser(credentials);
@@ -13,19 +18,20 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem("refresh", data.refresh);
 
-    setUser(data);
+    setUser({
+      token: data.access,
+    });
 
     return data;
   };
 
   const logout = () => {
+    localStorage.removeItem("access");
 
-  localStorage.removeItem("access");
-  localStorage.removeItem("refresh");
+    localStorage.removeItem("refresh");
 
-  setUser(null);
-
-};
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider

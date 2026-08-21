@@ -29,31 +29,25 @@ export default {
 			const { prompt } = await request.json();
 
 
-			const response = await fetch(
-				"https://openrouter.ai/api/v1/chat/completions",
-				{
-					method: "POST",
+			const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+				method: 'POST',
 
-					headers: {
-						Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-						"Content-Type": "application/json",
-					},
+				headers: {
+					Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
+					'Content-Type': 'application/json',
+				},
 
+				body: JSON.stringify({
+					model: 'meta-llama/llama-3.1-8b-instruct',
 
-					body: JSON.stringify({
-
-						model: "nvidia/nemotron-3-super-120b-a12b:free",
-
-						messages: [
-							{
-								role: "user",
-								content: prompt,
-							},
-						],
-
-					}),
-				}
-			);
+					messages: [
+						{
+							role: 'user',
+							content: prompt,
+						},
+					],
+				}),
+			});
 
 
 

@@ -1,0 +1,333 @@
+import { useState, useContext } from "react";
+import { TripContext } from "../../context/TripContext";
+import { saveTrips } from "../../services/localStorage";
+import { v4 as uuidv4 } from "uuid";
+
+import { generateAIResponse } from "../../services/ai";
+import { itineraryPrompt } from "../../utils/prompts";
+
+export default function TripForm() {
+  const { trips, addTrip } = useContext(TripContext);
+
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    destination: "",
+    budget: "",
+    startDate: "",
+    endDate: "",
+    travelStyle: "",
+    travelers: "1",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.destination.trim()) {
+      alert("Please enter a destination.");
+      return;
+    }
+
+    if (!formData.budget) {
+      alert("Please enter your budget.");
+      return;
+    }
+
+    if (!formData.startDate) {
+      alert("Please select a start date.");
+      return;
+    }
+
+    if (!formData.endDate) {
+      alert("Please select an end date.");
+      return;
+    }
+
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+
+    if (end < start) {
+      alert("End date must be after start date.");
+      return;
+    }
+
+    const difference = (end - start) / (1000 * 60 * 60 * 24) + 1;
+
+    if (difference > 60) {
+      alert("Trip duration cannot be longer than 60 days.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Generate AI Trip
+
+      const aiTrip = await generateAIResponse(
+        itineraryPrompt({
+          destination: formData.destination,
+
+          budget: Number(formData.budget),
+
+          travelStyle: formData.travelStyle,
+
+          travelers: Number(formData.travelers),
+
+          dates: {
+            start: formData.startDate,
+
+            end: formData.endDate,
+          },
+        }),
+      );
+
+      const newTrip = {
+        id: uuidv4(),
+
+        destination: formData.destination,
+
+        budget: Number(formData.budget),
+
+        dates: {
+          start: formData.startDate,
+
+          end: formData.endDate,
+        },
+
+        travelStyle: formData.travelStyle,
+
+        travelers: Number(formData.travelers),
+
+        favorite: false,
+
+        status: "completed",
+
+        title: aiTrip.title,
+
+        duration: aiTrip.duration,
+
+        itinerary: aiTrip.days,
+
+        estimatedCost: aiTrip.budget,
+
+        packingList: aiTrip.packing,
+      };
+
+      const updatedTrips = [...trips, newTrip];
+
+      addTrip(newTrip);
+
+      saveTrips(updatedTrips);
+
+      console.log("CREATED AI TRIP:", newTrip);
+
+      alert("Trip created successfully!");
+
+      setFormData({
+        destination: "",
+
+        budget: "",
+
+        startDate: "",
+
+        endDate: "",
+
+        travelStyle: "",
+
+        travelers: "1",
+      });
+    } catch (error) {
+      console.error("AI Trip Error:", error);
+
+      alert("Failed to generate AI trip.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveDraft = () => {
+    const draftTrip = {
+      id: uuidv4(),
+
+      destination: formData.destination,
+
+      budget: Number(formData.budget) || 0,
+
+      dates: {
+        start: formData.startDate,
+
+        end: formData.endDate,
+      },
+
+      travelStyle: formData.travelStyle,
+
+      favorite: false,
+
+      status: "draft",
+
+      itinerary: [],
+
+      packingList: [],
+    };
+
+    const updatedTrips = [...trips, draftTrip];
+
+    addTrip(draftTrip);
+
+    saveTrips(updatedTrips);
+
+    alert("Trip saved as draft!");
+  };
+
+  return (
+    <section className="bg-stone-50 py-20 dark:bg-[#0F172A]">
+      <div className="mx-auto max-w-4xl rounded-3xl bg-white p-10 shadow-xl dark:bg-[#1E293B]">
+        <h2 className="mb-3 text-center text-4xl font-bold dark:text-white">
+          Plan Your Next Adventure
+        </h2>
+
+        <p className="mb-10 text-center text-gray-600 dark:text-gray-300">
+          Fill in your travel details and let TravelGenie help organize your
+          perfect journey.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="mb-2 block font-semibold dark:text-white">
+              📍 Destination
+            </label>
+
+            <input
+              name="destination"
+              value={formData.destination}
+              onChange={handleChange}
+              type="text"
+              placeholder="e.g. Paris"
+              className="w-full rounded-xl border border-gray-300 bg-white p-4 outline-none focus:border-lime-500 dark:border-gray-700 dark:bg-[#111827] dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block font-semibold dark:text-white">
+              💰 Budget (USD)
+            </label>
+
+            <input
+              name="budget"
+              value={formData.budget}
+              onChange={handleChange}
+              type="number"
+              placeholder="1000"
+              className="w-full rounded-xl border border-gray-300 bg-white p-4 outline-none focus:border-lime-500 dark:border-gray-700 dark:bg-[#111827] dark:text-white"
+            />
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block font-semibold dark:text-white">
+                📅 Start Date
+              </label>
+
+              <input
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
+                type="date"
+                className="w-full rounded-xl border border-gray-300 bg-white p-4 dark:border-gray-700 dark:bg-[#111827] dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block font-semibold dark:text-white">
+                📅 End Date
+              </label>
+
+              <input
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleChange}
+                type="date"
+                className="w-full rounded-xl border border-gray-300 bg-white p-4 dark:border-gray-700 dark:bg-[#111827] dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block font-semibold dark:text-white">
+                ✈️ Travel Style
+              </label>
+
+              <select
+                name="travelStyle"
+                value={formData.travelStyle}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-300 bg-white p-4 dark:border-gray-700 dark:bg-[#111827] dark:text-white"
+              >
+                <option value="">Select Travel Style</option>
+
+                <option>Adventure</option>
+
+                <option>Luxury</option>
+
+                <option>Family</option>
+
+                <option>Romantic</option>
+
+                <option>Nature</option>
+
+                <option>Business</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block font-semibold dark:text-white">
+                👥 Travelers
+              </label>
+
+              <select
+                name="travelers"
+                value={formData.travelers}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-gray-300 bg-white p-4 dark:border-gray-700 dark:bg-[#111827] dark:text-white"
+              >
+                <option value="1">1 Traveler</option>
+
+                <option value="2">2 Travelers</option>
+
+                <option value="3">3 Travelers</option>
+
+                <option value="4">4 Travelers</option>
+
+                <option value="5">5+ Travelers</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={saveDraft}
+            className="w-full rounded-xl border border-lime-500 py-3 font-semibold text-lime-600 hover:bg-lime-50"
+          >
+            Save as Draft
+          </button>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-lime-500 py-4 text-lg font-semibold text-black transition hover:bg-lime-400 disabled:opacity-60"
+          >
+            {loading ? "Generating Your Trip..." : "🤖 Generate AI Trip"}
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}

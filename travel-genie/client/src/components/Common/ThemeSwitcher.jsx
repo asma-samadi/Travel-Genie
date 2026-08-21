@@ -1,6 +1,6 @@
 import { Sun, Moon, Monitor } from "lucide-react";
 
-import { useTheme } from "../../context/ThemeContext.jsx";
+import { useTheme } from "../../context/ThemeContext";
 
 function ThemeSwitcher() {
   const { theme, changeTheme } = useTheme();
@@ -8,25 +8,36 @@ function ThemeSwitcher() {
   return (
     <div
       className="
-flex
-items-center
-gap-2
-bg-gray-100
-dark:bg-gray-800
-rounded-full
-p-1
-"
+      flex
+      items-center
+      gap-1
+
+      rounded-full
+
+      bg-white/10
+
+      backdrop-blur-xl
+
+      border
+      border-white/10
+
+      p-1
+      "
     >
       <button
         onClick={() => changeTheme("light")}
         className={`
-p-2
-rounded-full
-transition
+        p-2
+        rounded-full
+        transition-all
+        duration-300
 
-${theme === "light" ? "bg-white shadow text-cyan-500" : "text-gray-500"}
-
-`}
+        ${
+          theme === "light"
+            ? "bg-cyan-500 text-white shadow-lg"
+            : "text-white/60 hover:bg-white/10"
+        }
+      `}
       >
         <Sun size={18} />
       </button>
@@ -34,13 +45,17 @@ ${theme === "light" ? "bg-white shadow text-cyan-500" : "text-gray-500"}
       <button
         onClick={() => changeTheme("dark")}
         className={`
-p-2
-rounded-full
-transition
+        p-2
+        rounded-full
+        transition-all
+        duration-300
 
-${theme === "dark" ? "bg-white shadow text-cyan-500" : "text-gray-500"}
-
-`}
+        ${
+          theme === "dark"
+            ? "bg-cyan-500 text-white shadow-lg"
+            : "text-white/60 hover:bg-white/10"
+        }
+      `}
       >
         <Moon size={18} />
       </button>
@@ -48,13 +63,17 @@ ${theme === "dark" ? "bg-white shadow text-cyan-500" : "text-gray-500"}
       <button
         onClick={() => changeTheme("system")}
         className={`
-p-2
-rounded-full
-transition
+        p-2
+        rounded-full
+        transition-all
+        duration-300
 
-${theme === "system" ? "bg-white shadow text-cyan-500" : "text-gray-500"}
-
-`}
+        ${
+          theme === "system"
+            ? "bg-cyan-500 text-white shadow-lg"
+            : "text-white/60 hover:bg-white/10"
+        }
+      `}
       >
         <Monitor size={18} />
       </button>

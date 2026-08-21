@@ -14,47 +14,43 @@ class Trip(models.Model):
         max_length=200
     )
 
-    start_date = models.DateField()
-
-    end_date = models.DateField()
-
-    budget = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
+    budget = models.IntegerField(
+        default=0
     )
 
-    travelers = models.PositiveIntegerField(
+    travel_style = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    travelers = models.IntegerField(
         default=1
     )
 
-    travel_style_choices = [
-        ("Adventure", "Adventure"),
-        ("Relaxation", "Relaxation"),
-        ("Luxury", "Luxury"),
-        ("Budget", "Budget"),
-        ("Culture", "Culture"),
-    ]
+    start_date = models.DateField(
+        null=True,
+        blank=True
+    )
 
-    travel_style = models.CharField(
-        max_length=50,
-        choices=travel_style_choices,
-        default="Adventure"
+    end_date = models.DateField(
+        null=True,
+        blank=True
     )
 
     itinerary = models.JSONField(
-        blank=True,
-        null=True
+        default=list,
+        blank=True
     )
 
-    trip_image = models.ImageField(
-        upload_to="trips/",
-        blank=True,
-        null=True
+    packing_list = models.JSONField(
+        default=list,
+        blank=True
     )
 
-    is_favorite = models.BooleanField(
+    favorite = models.BooleanField(
         default=False
     )
+
 
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -62,4 +58,4 @@ class Trip(models.Model):
 
 
     def __str__(self):
-        return f"{self.destination} - {self.user.username}"
+        return self.destination

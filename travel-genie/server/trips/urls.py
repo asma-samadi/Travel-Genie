@@ -1,15 +1,15 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from . import views
+from .views import TripViewSet
 
 
+router = DefaultRouter()
 
-urlpatterns = [
+router.register(
+    "",
+    TripViewSet,
+    basename="trip"
+)
 
-    path(
-        "",
-        views.trips_list,
-        name="trips-list"
-    ),
 
-]
+urlpatterns = router.urls

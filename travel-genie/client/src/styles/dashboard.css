@@ -1,0 +1,37 @@
+.dashboard-bg {
+  background: linear-gradient(
+    135deg,
+    #eef4ff 0%,
+    #f8fbff 50%,
+    #ffffff 100%
+  );
+
+  min-height: 100vh;
+}
+
+.dark .dashboard-bg {
+  background: linear-gradient(
+    135deg,
+    #07111f 0%,
+    #0b172a 50%,
+    #08101d 100%
+  );
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  border-radius: 28px;
+
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass-card {
+  background: rgba(11, 23, 42, 0.8);
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}

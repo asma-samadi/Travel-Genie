@@ -1,84 +1,124 @@
-import { useState, useEffect } from "react";
-import { TripContext } from "./TripContext.js";
-import { saveTrips, getTrips } from "../services/localStorage";
+import { createContext, useContext, useEffect, useState } from "react";
 
-export default function TripProvider({ children }) {
-  const [trips, setTrips] = useState(() => {
-    const storedTrips = getTrips();
-    return storedTrips || [];
-  });
+import { useAuth } from "./AuthContext";
 
-  const [searchQuery, setSearchQuery] = useState("");
+import {
+  getTrips,
+  createTrip as createTripAPI,
+  updateTrip as updateTripAPI,
+  deleteTrip as deleteTripAPI,
+} from "../api/trips";
 
-  const addTrip = (trip) => {
-    const updatedTrips = [...trips, trip];
+export const TripContext = createContext(null);
 
-    setTrips(updatedTrips);
-    saveTrips(updatedTrips);
-  };
+export function TripProvider({ children }) {
+  const { user } = useAuth();
 
-  const updateTrip = (updatedTrip) => {
-    const updatedTrips = trips.map((trip) =>
-      trip.id === updatedTrip.id ? updatedTrip : trip,
-    );
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    setTrips(updatedTrips);
-    saveTrips(updatedTrips);
-  };
+  const loadTrips = async () => {
+    const token = localStorage.getItem("access");
 
-  const deleteTrip = (id) => {
-    const updatedTrips = trips.filter((trip) => trip.id !== id);
+    if (!token) {
+      setTrips([]);
+      setLoading(false);
+      return;
+    }
 
-    setTrips(updatedTrips);
-    saveTrips(updatedTrips);
-  };
+    try {
+      setLoading(true);
 
-  const toggleFavorite = (id) => {
-    const updatedTrips = trips.map((trip) =>
-      trip.id === id
-        ? {
-            ...trip,
-            favorite: !trip.favorite,
-          }
-        : trip,
-    );
+      const data = await getTrips();
 
-    setTrips(updatedTrips);
-    saveTrips(updatedTrips);
-  };
+      console.log("TRIPS API RESPONSE:", data);
 
-  const saveItinerary = (tripId, itinerary) => {
-    const updatedTrips = trips.map((trip) =>
-      trip.id === tripId
-        ? {
-            ...trip,
-            itinerary,
-          }
-        : trip,
-    );
+      setTrips(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error loading trips:", error);
 
-    setTrips(updatedTrips);
-    saveTrips(updatedTrips);
+      setTrips([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    saveTrips(trips);
-  }, [trips]);
+    if (user) {
+      loadTrips();
+    } else {
+      setTrips([]);
+    }
+  }, [user]);
+
+  const addTrip = async (tripData) => {
+    const newTrip = await createTripAPI(tripData);
+
+    setTrips((currentTrips) => [...currentTrips, newTrip]);
+
+    return newTrip;
+  };
+
+  const updateTrip = async (id, tripData) => {
+    const updatedTrip = await updateTripAPI(id, tripData);
+
+    setTrips((currentTrips) =>
+      currentTrips.map((trip) =>
+        String(trip.id) === String(id) ? updatedTrip : trip,
+      ),
+    );
+
+    return updatedTrip;
+  };
+
+  const deleteTrip = async (id) => {
+    await deleteTripAPI(id);
+
+    setTrips((currentTrips) =>
+      currentTrips.filter((trip) => String(trip.id) !== String(id)),
+    );
+  };
+
+  const toggleFavorite = async (id) => {
+    const trip = trips.find((item) => String(item.id) === String(id));
+
+    if (!trip) return;
+
+    const updatedTrip = await updateTripAPI(id, {
+      ...trip,
+      favorite: !trip.favorite,
+    });
+
+    setTrips((currentTrips) =>
+      currentTrips.map((item) =>
+        String(item.id) === String(id) ? updatedTrip : item,
+      ),
+    );
+  };
 
   return (
     <TripContext.Provider
       value={{
         trips,
+        loading,
         addTrip,
         updateTrip,
         deleteTrip,
         toggleFavorite,
-        saveItinerary,
-        searchQuery,
-        setSearchQuery,
+        loadTrips,
       }}
     >
       {children}
     </TripContext.Provider>
   );
+}
+
+export function useTrips() {
+  const context = useContext(TripContext);
+
+  if (!context) {
+    throw new Error("useTrips must be used inside a TripProvider");
+  }
+
+  return context;
 }
