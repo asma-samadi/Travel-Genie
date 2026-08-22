@@ -76,3 +76,4 @@ class TripSerializer(serializers.ModelSerializer):
             validated_data["end_date"] = dates.get("end")
 
         return super().update(instance, validated_data)
+    

@@ -1,72 +1,87 @@
 import { useState } from "react";
-import { Search, Crown } from "lucide-react";
+
+import { Search, Crown, Menu } from "lucide-react";
 
 import ThemeSwitcher from "../Common/ThemeSwitcher";
 
-function DashboardHeader() {
+function DashboardHeader({ openSidebar }) {
   const [search, setSearch] = useState("");
 
   return (
     <header
       className="
-      w-full
+        w-full
 
-      flex
-      items-center
-
-      gap-4
-
-      mb-8
-
-      flex-wrap
-
-      lg:flex-nowrap
-
-      "
-    >
-      {/* Upgrade Pro */}
-
-      <button
-        className="
         flex
 
         items-center
 
-        gap-2
+        gap-4
 
+        mb-8
 
-        rounded-2xl
+        flex-wrap
 
+        lg:flex-nowrap
+      "
+    >
+      {/* Mobile Menu */}
+      <button
+        type="button"
+        onClick={openSidebar}
+        className="
+    lg:hidden
+    h-11
+    w-11
+    shrink-0
+    rounded-xl
+    flex
+    items-center
+    justify-center
+    bg-white/70
+    dark:bg-white/10
+    border
+    border-gray-200
+    dark:border-white/10
+    text-gray-800
+    dark:text-white
+    backdrop-blur-xl
+    hover:bg-gray-100
+    dark:hover:bg-white/20
+    transition-all
+    duration-300
+  "
+        aria-label="Open sidebar"
+      >
+        <Menu size={22} />
+      </button>
 
-        px-5
+      {/* Upgrade Pro */}
+      <button
+        className="
+          flex
+          items-center
+          gap-2
 
-        py-3
+          rounded-2xl
 
+          px-5
+          py-3
 
-        bg-gradient-to-r
+          bg-gradient-to-r
+          from-cyan-500
+          to-blue-600
 
-        from-cyan-500
+          text-white
+          text-sm
+          font-medium
 
-        to-blue-600
+          shadow-lg
 
+          transition-all
+          duration-300
 
-        text-white
-
-        text-sm
-
-        font-medium
-
-
-        shadow-lg
-
-
-        transition-all
-
-        duration-300
-
-
-        hover:scale-105
-
+          hover:scale-105
         "
       >
         <Crown size={18} />
@@ -75,34 +90,32 @@ function DashboardHeader() {
       </button>
 
       {/* Search */}
-
       <div
         className="
-        flex-1
+          flex-1
 
-        min-w-[220px]
-
+          min-w-[220px]
         "
       >
         <div
           className="
-          relative
-
-          w-full
-
+            relative
+            w-full
           "
         >
           <Search
             size={20}
             className="
-  absolute
-  left-5
-  top-1/2
-  -translate-y-1/2
-  text-gray-500
-  dark:text-white
-  z-10
-  "
+              absolute
+              left-5
+              top-1/2
+              -translate-y-1/2
+
+              text-gray-500
+              dark:text-white
+
+              z-10
+            "
           />
 
           <input
@@ -111,131 +124,76 @@ function DashboardHeader() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search destinations, trips, memories..."
             className="
-            
-            w-full
+              w-full
 
+              rounded-2xl
 
-            rounded-2xl
+              px-5
+              py-3
 
+              pl-12
 
-            px-5
+              text-sm
 
-            py-3
+              bg-white/70
+              dark:bg-white/10
 
+              border
+              border-gray-200
+              dark:border-white/10
 
-            pl-12
+              text-gray-800
+              dark:text-white
 
+              placeholder:text-gray-400
+              dark:placeholder:text-white/50
 
-            text-sm
+              backdrop-blur-xl
 
+              outline-none
 
+              transition-all
+              duration-300
 
-            bg-white/70
-
-            dark:bg-white/10
-
-
-
-            border
-
-            border-gray-200
-
-            dark:border-white/10
-
-
-
-            text-gray-800
-
-            dark:text-white
-
-
-
-            placeholder:text-gray-400
-
-            dark:placeholder:text-white/50
-
-
-
-            backdrop-blur-xl
-
-
-
-            outline-none
-
-
-
-            transition-all
-
-            duration-300
-
-
-
-            focus:ring-2
-
-            focus:ring-cyan-400
-
-
-
+              focus:ring-2
+              focus:ring-cyan-400
             "
           />
         </div>
       </div>
 
       {/* Theme */}
-
       <ThemeSwitcher />
 
       {/* Profile */}
-
       <button
         className="
-        h-11
+          h-11
+          w-11
 
-        w-11
+          shrink-0
 
+          rounded-full
 
+          flex
+          items-center
+          justify-center
 
-        rounded-full
+          bg-gradient-to-r
+          from-cyan-500
+          to-blue-600
 
+          text-white
 
+          text-sm
+          font-bold
 
-        flex
+          shadow-lg
 
-        items-center
+          transition-all
+          duration-300
 
-        justify-center
-
-
-
-        bg-gradient-to-r
-
-        from-cyan-500
-
-        to-blue-600
-
-
-
-        text-white
-
-
-        text-sm
-
-        font-bold
-
-
-
-        shadow-lg
-
-
-
-        transition-all
-
-        duration-300
-
-
-
-        hover:scale-110
-
+          hover:scale-110
         "
       >
         A

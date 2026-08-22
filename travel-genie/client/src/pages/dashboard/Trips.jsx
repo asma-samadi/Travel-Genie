@@ -233,7 +233,7 @@ function Trips() {
             My Trips
           </h1>
 
-          <p className="mt-2 text-gray-600 dark:text-white/70">
+          <p className="mt-2 text-gray-500 dark:text-white/70">
             Manage your adventures and AI-generated plans.
           </p>
         </div>
@@ -374,7 +374,9 @@ function Trips() {
                 >
                   <MapPin size={16} />
 
-                  <span>{trip.travelStyle || trip.travel_style || "Travel"}</span>
+                  <span>
+                    {trip.travelStyle || trip.travel_style || "Travel"}
+                  </span>
                 </div>
               </div>
 
@@ -422,9 +424,9 @@ function Trips() {
                 <Calendar size={17} />
 
                 <p className="text-gray-500 dark:text-white/60">
-  {trip.dates?.start || trip.start_date || "No date"} -{" "}
-  {trip.dates?.end || trip.end_date || "No date"}
-</p>
+                  {trip.dates?.start || trip.start_date || "No date"} -{" "}
+                  {trip.dates?.end || trip.end_date || "No date"}
+                </p>
               </div>
 
               {/* TRAVELERS */}

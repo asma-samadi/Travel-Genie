@@ -23,3 +23,26 @@
   color:#06b6d4;
 
 }
+
+
+.input-style {
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-style:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+}
+
+.dark .input-style {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.1);
+}

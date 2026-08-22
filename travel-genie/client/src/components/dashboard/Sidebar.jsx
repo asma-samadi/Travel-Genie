@@ -1,6 +1,12 @@
 import { NavLink } from "react-router-dom";
 
-import { LayoutDashboard, Map, User, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Map,
+  Plus,
+  User,
+  Settings,
+} from "lucide-react";
 
 const menuItems = [
   {
