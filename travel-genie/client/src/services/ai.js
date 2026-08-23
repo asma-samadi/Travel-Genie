@@ -4,11 +4,9 @@ export async function generateAIResponse(prompt) {
       "https://travelgenie-api.asma-samadi.workers.dev",
       {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           prompt,
         }),
@@ -28,8 +26,14 @@ export async function generateAIResponse(prompt) {
       throw new Error("No AI content returned.");
     }
 
+    // Make sure the AI response is a string
+    if (typeof content !== "string") {
+      console.log("AI returned non-string content:", content);
+      content = JSON.stringify(content);
+    }
+
     content = content
-      .replace(/```json/g, "")
+      .replace(/```json/gi, "")
       .replace(/```/g, "")
       .trim();
 
@@ -38,7 +42,6 @@ export async function generateAIResponse(prompt) {
     return JSON.parse(content);
   } catch (error) {
     console.error("AI Error:", error);
-
     throw new Error("AI response failed.");
   }
 }
