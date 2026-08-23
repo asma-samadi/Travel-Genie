@@ -29,29 +29,33 @@ export default {
 			const { prompt } = await request.json();
 
 
-			const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-				method: 'POST',
-
-				headers: {
-					Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-					'Content-Type': 'application/json',
-				},
-
-				body: JSON.stringify({
-					model: 'meta-llama/llama-3.1-8b-instruct',
-
-					messages: [
-						{
-							role: 'user',
-							content: prompt,
-						},
-					],
-				}),
+			const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
+				messages: [
+					{
+						role: 'user',
+						content: prompt,
+					},
+				],
 			});
 
+			console.log('CLOUDFLARE AI RESPONSE:');
+			console.log(result);
 
-
-			const data = await response.json();
+			return Response.json(
+				{
+					choices: [
+						{
+							message: {
+								role: 'assistant',
+								content: result.response,
+							},
+						},
+					],
+				},
+				{
+					headers: corsHeaders,
+				},
+			);
 
 
 			console.log("OPENROUTER RESPONSE:");

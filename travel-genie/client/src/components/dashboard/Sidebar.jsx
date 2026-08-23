@@ -3,7 +3,9 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Map,
-  Plus,
+  Wallet,
+  Sparkles,
+  Brain,
   User,
   Settings,
 } from "lucide-react";
@@ -19,6 +21,21 @@ const menuItems = [
     name: "Trips",
     path: "/dashboard/trips",
     icon: Map,
+  },
+  {
+    name: "Budget",
+    path: "/dashboard/budget",
+    icon: Wallet,
+  },
+  {
+    name: "Recommendations",
+    path: "/dashboard/recommendations",
+    icon: Sparkles,
+  },
+  {
+    name: "Memory",
+    path: "/dashboard/memory",
+    icon: Brain,
   },
 ];
 
@@ -48,7 +65,6 @@ function Sidebar() {
       "
     >
       {/* Logo */}
-
       <div>
         <h1
           className="
@@ -65,8 +81,7 @@ function Sidebar() {
         </h1>
       </div>
 
-      {/* Menu */}
-
+      {/* Main Menu */}
       <nav
         className="
           mt-8
@@ -103,7 +118,6 @@ function Sidebar() {
               }
             >
               <Icon size={18} />
-
               <span>{item.name}</span>
             </NavLink>
           );
@@ -111,7 +125,6 @@ function Sidebar() {
       </nav>
 
       {/* Divider */}
-
       <div
         className="
           my-3
@@ -121,52 +134,61 @@ function Sidebar() {
         "
       />
 
-      {/* Bottom */}
-
+      {/* Account Menu */}
       <div className="space-y-1">
-        <button
-          type="button"
-          className="
-            w-full
-            flex
-            items-center
-            gap-3
-            px-4
-            py-3
-            rounded-xl
-            text-sm
-            text-gray-500
-            dark:text-white/50
-            cursor-not-allowed
-          "
-          disabled
+        <NavLink
+          to="/dashboard/profile"
+          className={({ isActive }) =>
+            `
+              w-full
+              flex
+              items-center
+              gap-3
+              px-4
+              py-3
+              rounded-xl
+              text-sm
+              transition-all
+              duration-300
+              hover:translate-x-1
+              ${
+                isActive
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg"
+                  : "text-gray-700 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/10"
+              }
+            `
+          }
         >
           <User size={18} />
-
           <span>Profile</span>
-        </button>
+        </NavLink>
 
-        <button
-          type="button"
-          className="
-            w-full
-            flex
-            items-center
-            gap-3
-            px-4
-            py-3
-            rounded-xl
-            text-sm
-            text-gray-500
-            dark:text-white/50
-            cursor-not-allowed
-          "
-          disabled
+        <NavLink
+          to="/dashboard/settings"
+          className={({ isActive }) =>
+            `
+              w-full
+              flex
+              items-center
+              gap-3
+              px-4
+              py-3
+              rounded-xl
+              text-sm
+              transition-all
+              duration-300
+              hover:translate-x-1
+              ${
+                isActive
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg"
+                  : "text-gray-700 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/10"
+              }
+            `
+          }
         >
           <Settings size={18} />
-
           <span>Settings</span>
-        </button>
+        </NavLink>
       </div>
     </aside>
   );

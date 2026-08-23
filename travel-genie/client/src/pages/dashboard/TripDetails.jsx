@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import {
   ArrowLeft,
@@ -13,6 +14,8 @@ import {
   Moon,
   Check,
 } from "lucide-react";
+
+import { generateAIResponse } from "../../services/ai";
 
 import { useTrips } from "../../context/TripContext.jsx";
 

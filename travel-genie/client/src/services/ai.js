@@ -1,16 +1,19 @@
 export async function generateAIResponse(prompt) {
   try {
-    const response = await fetch("http://127.0.0.1:8787", {
-      method: "POST",
+    const response = await fetch(
+      "https://travelgenie-api.asma-samadi.workers.dev",
+      {
+        method: "POST",
 
-      headers: {
-        "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          prompt,
+        }),
       },
-
-      body: JSON.stringify({
-        prompt,
-      }),
-    });
+    );
 
     const data = await response.json();
 
