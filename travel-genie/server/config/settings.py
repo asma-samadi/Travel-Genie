@@ -178,13 +178,14 @@ SIMPLE_JWT = {
 # CORS
 # =====================================================
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS",
-    "http://localhost:5173",
-).split(",")
+# CORS_ALLOWED_ORIGINS = os.environ.get(
+#     "CORS_ALLOWED_ORIGINS",
+#     "",
+# ).split(",")
 
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_ALL_ORIGINS = True
 
 # =====================================================
 # STATIC & MEDIA FILES
