@@ -14,7 +14,6 @@ export function AuthProvider({ children }) {
   const [authLoading, setAuthLoading] = useState(true);
 
   // Load the user's profile using the saved JWT token
-
   const loadUser = async () => {
     const token = localStorage.getItem("access");
 
@@ -40,7 +39,6 @@ export function AuthProvider({ children }) {
   };
 
   // Keep the user logged in after refreshing the page
-
   useEffect(() => {
     loadUser();
   }, []);
@@ -52,7 +50,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem("refresh", data.refresh);
 
     // Load the real user information immediately after login
-
     const profile = await getProfile();
 
     setUser({
@@ -69,7 +66,7 @@ export function AuthProvider({ children }) {
 
   const register = async (userData) => {
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/users/register/",
+      "https://travelgenie-backend-fcvw.onrender.com/api/users/register/",
       userData,
     );
 
@@ -79,7 +76,6 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
-
     setUser(null);
   };
 

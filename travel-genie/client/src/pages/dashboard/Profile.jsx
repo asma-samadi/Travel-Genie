@@ -141,7 +141,7 @@ function Profile() {
     if (profile?.profile_image) {
       const imageUrl = profile.profile_image.startsWith("http")
         ? profile.profile_image
-        : `http://127.0.0.1:8000${profile.profile_image}`;
+        : `${import.meta.env.VITE_API_URL}${profile.profile_image}`;
 
       setImagePreview(imageUrl);
     } else {
@@ -228,7 +228,7 @@ function Profile() {
       }
 
       const response = await axios.patch(
-        "http://127.0.0.1:8000/api/users/profile/",
+          `${import.meta.env.VITE_API_URL}/api/users/profile/`,
         formData,
         {
           headers: {
@@ -248,7 +248,7 @@ function Profile() {
       if (response.data?.profile_image) {
         const imageUrl = response.data.profile_image.startsWith("http")
           ? response.data.profile_image
-          : `http://127.0.0.1:8000${response.data.profile_image}`;
+          : `https://travelgenie-backend-fcvw.onrender.com${response.data.profile_image}`;
 
         setImagePreview(imageUrl);
         setImageError(false);
@@ -296,7 +296,7 @@ function Profile() {
       formData.append("profile_image", "");
 
       const response = await axios.patch(
-        "http://127.0.0.1:8000/api/users/profile/",
+        "https://travelgenie-backend-fcvw.onrender.com/api/users/profile/",
         formData,
         {
           headers: {
@@ -363,10 +363,10 @@ function Profile() {
 
 
   const profileImageUrl = profile?.profile_image
-  ? profile.profile_image.startsWith("http")
-    ? profile.profile_image
-    : `http://127.0.0.1:8000${profile.profile_image}`
-  : null;
+    ? profile.profile_image.startsWith("http")
+      ? profile.profile_image
+      : `https://travelgenie-backend-fcvw.onrender.com${profile.profile_image}`
+    : null;
   
   return (
     <div className="max-w-5xl mx-auto space-y-8">
