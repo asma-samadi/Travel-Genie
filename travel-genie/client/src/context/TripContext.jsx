@@ -15,6 +15,7 @@ export function TripProvider({ children }) {
   const { user } = useAuth();
 
   const [trips, setTrips] = useState([]);
+
   const [loading, setLoading] = useState(false);
 
   const loadTrips = async () => {
@@ -62,9 +63,17 @@ export function TripProvider({ children }) {
   const updateTrip = async (id, tripData) => {
     const updatedTrip = await updateTripAPI(id, tripData);
 
+    console.log("UPDATED TRIP API RESPONSE:", updatedTrip);
+
     setTrips((currentTrips) =>
       currentTrips.map((trip) =>
-        String(trip.id) === String(id) ? updatedTrip : trip,
+        String(trip.id) === String(id)
+          ? {
+              ...trip,
+              ...tripData,
+              ...updatedTrip,
+            }
+          : trip,
       ),
     );
 
@@ -84,14 +93,22 @@ export function TripProvider({ children }) {
 
     if (!trip) return;
 
-    const updatedTrip = await updateTripAPI(id, {
+    const tripData = {
       ...trip,
       favorite: !trip.favorite,
-    });
+    };
+
+    const updatedTrip = await updateTripAPI(id, tripData);
 
     setTrips((currentTrips) =>
       currentTrips.map((item) =>
-        String(item.id) === String(id) ? updatedTrip : item,
+        String(item.id) === String(id)
+          ? {
+              ...item,
+              ...tripData,
+              ...updatedTrip,
+            }
+          : item,
       ),
     );
   };

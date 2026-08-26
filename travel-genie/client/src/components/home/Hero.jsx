@@ -226,55 +226,68 @@ function Hero() {
           gap-4
           "
             >
+              {/* Destination */}
               <div
                 className="
-            bg-gray-50
-            dark:bg-gray-800
-
-            rounded-2xl
-
-            p-4
-            "
+    bg-gray-50
+    dark:bg-gray-800
+    rounded-2xl
+    p-4
+  "
               >
-                <MapPin size={18} />
+                <MapPin
+                  size={18}
+                  className="text-cyan-500 dark:text-cyan-400"
+                />
 
-                <p className="text-sm text-gray-500">Destination</p>
+                <p className="text-sm text-gray-500 dark:text-white/60">
+                  Destination
+                </p>
 
-                <p className="font-semibold">Paris</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  Paris
+                </p>
               </div>
 
+              {/* Date */}
               <div
                 className="
-            bg-gray-50
-            dark:bg-gray-800
-
-            rounded-2xl
-
-            p-4
-            "
+    bg-gray-50
+    dark:bg-gray-800
+    rounded-2xl
+    p-4
+  "
               >
-                <Calendar size={18} />
+                <Calendar
+                  size={18}
+                  className="text-cyan-500 dark:text-cyan-400"
+                />
 
-                <p className="text-sm text-gray-500">Date</p>
+                <p className="text-sm text-gray-500 dark:text-white/60">Date</p>
 
-                <p className="font-semibold">June 20</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  June 20
+                </p>
               </div>
 
+              {/* Travelers */}
               <div
                 className="
-            bg-gray-50
-            dark:bg-gray-800
-
-            rounded-2xl
-
-            p-4
-            "
+    bg-gray-50
+    dark:bg-gray-800
+    rounded-2xl
+    p-4
+  "
               >
-                <Users size={18} />
+                <Users size={18} className="text-cyan-500 dark:text-cyan-400" />
 
-                <p className="text-sm text-gray-500">Travelers</p>
+                <p className="text-sm text-gray-500 dark:text-white/60">
+                  Travelers
+                </p>
 
-                <p className="font-semibold">2 People</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  2 People
+                </p>
               </div>
             </div>
 

@@ -28,20 +28,40 @@ export default {
 				messages: [
 					{
 						role: 'system',
-						content:
-							"You are a travel planning assistant. Follow the user's requested JSON format exactly. Return complete valid JSON and nothing else.",
+						content: `You are TravelGenie, a highly personalized travel recommendation assistant.
+
+You must carefully follow the user's prompt.
+
+Every response must be based on the EXACT destination, dates, number of travelers, budget, and interests provided by the user.
+
+Do NOT use generic travel recommendations.
+
+Do NOT automatically recommend the same famous attractions every time.
+
+Choose different relevant places, activities, foods, and practical tips when possible.
+
+Make recommendations specific to the destination.
+
+Use real attractions, local experiences, and local foods when appropriate.
+
+Return complete valid JSON exactly in the structure requested by the user.
+
+Return JSON only.
+Do not include markdown.
+Do not include explanations outside the JSON.`,
 					},
+
 					{
 						role: 'user',
 						content: prompt,
 					},
 				],
 
-				// Important: allow enough space for the whole itinerary
-				max_tokens: 1500,
+				// More space for 20 detailed recommendations
+				max_tokens: 2500,
 
-				// Lower temperature makes structured JSON more reliable
-				temperature: 0.2,
+				// Higher variety while still keeping JSON reasonably reliable
+				temperature: 0.7,
 			});
 
 			console.log('CLOUDFLARE AI RESPONSE:');

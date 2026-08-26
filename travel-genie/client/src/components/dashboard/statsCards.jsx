@@ -1,47 +1,86 @@
 import { Map, Wallet, Image, Globe } from "lucide-react";
-
 import { motion } from "framer-motion";
-
-const stats = [
-  {
-    title: "Total Trips",
-    value: "12",
-    icon: Map,
-  },
-
-  {
-    title: "Destinations",
-    value: "8",
-    icon: Globe,
-  },
-
-  {
-    title: "Total Budget",
-    value: "$8,500",
-    icon: Wallet,
-  },
-
-  {
-    title: "Memories",
-    value: "46",
-    icon: Image,
-  },
-];
+import { useMemo } from "react";
+import { useTrips } from "../../context/TripContext.jsx";
 
 function StatsCards() {
+  const { trips, loading } = useTrips();
+
+  const stats = useMemo(() => {
+    const tripList = Array.isArray(trips) ? trips : [];
+
+    // ======================================================
+    // TOTAL TRIPS
+    // ======================================================
+
+    const totalTrips = tripList.length;
+
+    // ======================================================
+    // UNIQUE DESTINATIONS
+    // ======================================================
+
+    const destinations = new Set(
+      tripList
+        .map((trip) => trip.destination)
+        .filter(Boolean)
+        .map((destination) => destination.trim().toLowerCase()),
+    );
+
+    const totalDestinations = destinations.size;
+
+    // ======================================================
+    // TOTAL BUDGET
+    // ======================================================
+
+    const totalBudget = tripList.reduce((total, trip) => {
+      const budget = Number(trip.budget) || 0;
+      return total + budget;
+    }, 0);
+
+    // ======================================================
+    // MEMORIES
+    // ======================================================
+    // If your API provides memories, count them.
+    // Otherwise this safely returns 0.
+
+    const totalMemories = tripList.reduce((total, trip) => {
+      if (Array.isArray(trip.memories)) {
+        return total + trip.memories.length;
+      }
+
+      if (Array.isArray(trip.memory)) {
+        return total + trip.memory.length;
+      }
+
+      return total;
+    }, 0);
+
+    return [
+      {
+        title: "Total Trips",
+        value: totalTrips,
+        icon: Map,
+      },
+      {
+        title: "Destinations",
+        value: totalDestinations,
+        icon: Globe,
+      },
+      {
+        title: "Total Budget",
+        value: `$${totalBudget.toLocaleString()}`,
+        icon: Wallet,
+      },
+      {
+        title: "Memories",
+        value: totalMemories,
+        icon: Image,
+      },
+    ];
+  }, [trips]);
+
   return (
-    <div
-      className="
-grid
-
-grid-cols-2
-
-xl:grid-cols-4
-
-gap-4
-
-"
-    >
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
       {stats.map((item, index) => {
         const Icon = item.icon;
 
@@ -58,100 +97,57 @@ gap-4
             }}
             transition={{
               delay: index * 0.1,
+              duration: 0.5,
+            }}
+            whileHover={{
+              y: -4,
+              scale: 1.01,
             }}
             className="
+              rounded-[28px]
+              p-5
 
-rounded-[28px]
+              bg-white/10
+              dark:bg-white/10
 
-p-5
+              backdrop-blur-xl
 
+              border
+              border-white/20
 
-bg-white/10
+              shadow-xl
 
-dark:bg-white/10
-
-
-backdrop-blur-xl
-
-
-border
-
-border-white/20
-
-
-shadow-xl
-
-
-"
+              transition-shadow
+              hover:shadow-2xl
+            "
           >
-            <div
-              className="
-
-flex
-
-items-center
-
-justify-between
-
-"
-            >
+            <div className="flex items-center justify-between">
               <div>
-                <p
-                  className="
+                <p className="text-sm text-white/60">{item.title}</p>
 
-text-sm
-
-text-white/60
-
-"
-                >
-                  {item.title}
-                </p>
-
-                <h2
-                  className="
-
-mt-2
-
-text-2xl
-
-font-bold
-
-text-white
-
-"
-                >
-                  {item.value}
+                <h2 className="mt-2 text-2xl font-bold text-white">
+                  {loading ? "..." : item.value}
                 </h2>
               </div>
 
               <div
                 className="
+                  h-12
+                  w-12
+                  rounded-2xl
 
-h-12
+                  bg-gradient-to-r
+                  from-cyan-500
+                  to-blue-600
 
-w-12
+                  flex
+                  items-center
+                  justify-center
 
-rounded-2xl
+                  text-white
 
-
-bg-gradient-to-r
-
-from-cyan-500
-
-to-blue-600
-
-
-flex
-
-items-center
-
-justify-center
-
-
-text-white
-
-"
+                  shadow-lg
+                "
               >
                 <Icon size={22} />
               </div>

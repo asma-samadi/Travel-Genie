@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-
 from .models import Profile
 
 
@@ -28,7 +27,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = [
@@ -41,8 +39,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-
     user = UserSerializer(read_only=True)
+
+    remove_profile_image = serializers.BooleanField(
+        write_only=True,
+        required=False,
+        default=False,
+    )
 
     class Meta:
         model = Profile
@@ -51,6 +54,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             "user",
             "profile_image",
             "bio",
-            "location",
+            "travel_style",
+            "favorite_destination",
+            "created_at",
+            "remove_profile_image",
+        ]
+        read_only_fields = [
+            "id",
+            "user",
+            "created_at",
         ]
         
