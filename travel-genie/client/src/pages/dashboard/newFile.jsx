@@ -8,7 +8,7 @@ import {
   Mountain,
 } from "lucide-react";
 
-import GlassCard from "../../components/common/GlassCard";
+import GlassCard from "../../components/Common/GlassCard";
 
 const recommendations = [
   {

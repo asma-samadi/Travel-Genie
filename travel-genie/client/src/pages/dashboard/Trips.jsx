@@ -15,7 +15,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useTrips } from "../../context/TripContext.jsx";
-import DeleteModal from "../../components/common/DeleteModal";
+import DeleteModal from "../../components/Common/DeleteModal";
 
 function Trips() {
   const navigate = useNavigate();

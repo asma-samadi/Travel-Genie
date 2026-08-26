@@ -24,7 +24,7 @@ import axios from "axios";
 import { getProfile } from "../../api/profile";
 import { useAuth } from "../../context/AuthContext";
 import { useTrips } from "../../context/TripContext.jsx";
-import GlassCard from "../../components/common/GlassCard";
+import GlassCard from "../../components/Common/GlassCard";
 
 function Profile() {
   const { user } = useAuth();

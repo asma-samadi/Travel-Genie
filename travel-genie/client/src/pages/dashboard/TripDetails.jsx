@@ -30,7 +30,7 @@ import {
 
 import { generateAIResponse } from "../../services/ai";
 import { useTrips } from "../../context/TripContext.jsx";
-import GlassCard from "../../components/common/GlassCard";
+import GlassCard from "../../components/Common/GlassCard";
 
 function TripDetails() {
   const { id } = useParams();

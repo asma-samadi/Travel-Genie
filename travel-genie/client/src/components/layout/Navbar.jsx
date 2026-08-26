@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import ThemeSwitcher from "../common/ThemeSwitcher";
+import ThemeSwitcher from "../Common/ThemeSwitcher";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
