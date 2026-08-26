@@ -1,7 +1,7 @@
 import { Brain, MapPin, Heart, Users, Wallet, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 
-import GlassCard from "../../components/common/GlassCard";
+import GlassCard from "../../components/Common/GlassCard";
 import { useTrips } from "../../context/TripContext.jsx";
 
 function Memory() {

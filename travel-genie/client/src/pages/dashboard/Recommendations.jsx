@@ -13,7 +13,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import GlassCard from "../../components/common/GlassCard";
+import GlassCard from "../../components/Common/GlassCard";
 import { useTrips } from "../../context/TripContext.jsx";
 import { generateAIResponse } from "../../services/ai";
 
