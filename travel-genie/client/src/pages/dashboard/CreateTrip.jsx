@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import {
   ArrowLeft,
   MapPin,
@@ -11,12 +13,16 @@ import {
   LocateFixed,
   Loader2,
 } from "lucide-react";
+
 import { useTrips } from "../../context/TripContext.jsx";
 
 function getTodayLocal() {
   const today = new Date();
+
   const year = today.getFullYear();
+
   const month = String(today.getMonth() + 1).padStart(2, "0");
+
   const day = String(today.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
@@ -24,6 +30,7 @@ function getTodayLocal() {
 
 function CreateTrip() {
   const navigate = useNavigate();
+
   const { addTrip } = useTrips();
 
   const [formData, setFormData] = useState({
@@ -37,11 +44,15 @@ function CreateTrip() {
   });
 
   const [error, setError] = useState("");
+
   const [locationLoading, setLocationLoading] = useState(false);
+
   const [locationMessage, setLocationMessage] = useState("");
 
   const [destinationResults, setDestinationResults] = useState([]);
+
   const [destinationLoading, setDestinationLoading] = useState(false);
+
   const [showDestinationResults, setShowDestinationResults] = useState(false);
 
   // --------------------------------------------------
@@ -94,10 +105,13 @@ function CreateTrip() {
         const data = await response.json();
 
         setDestinationResults(data);
+
         setShowDestinationResults(true);
       } catch (searchError) {
         console.error("Destination search failed:", searchError);
+
         setDestinationResults([]);
+
         setShowDestinationResults(true);
       } finally {
         setDestinationLoading(false);
@@ -118,6 +132,7 @@ function CreateTrip() {
     }));
 
     setDestinationResults([]);
+
     setShowDestinationResults(false);
   };
 
@@ -127,12 +142,14 @@ function CreateTrip() {
 
   const detectLocation = () => {
     setLocationMessage("");
+
     setError("");
 
     if (!navigator.geolocation) {
       setError(
         "Location detection is not supported by your browser. Please enter your starting location manually.",
       );
+
       return;
     }
 
@@ -154,10 +171,7 @@ function CreateTrip() {
           const data = await response.json();
 
           const city =
-            data.city ||
-            data.locality ||
-            data.principalSubdivision ||
-            "";
+            data.city || data.locality || data.principalSubdivision || "";
 
           const country = data.countryName || "";
 
@@ -210,6 +224,7 @@ function CreateTrip() {
         }
 
         setError(message);
+
         setLocationLoading(false);
       },
 
@@ -227,6 +242,7 @@ function CreateTrip() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
 
     if (!formData.origin.trim()) {
@@ -261,25 +277,34 @@ function CreateTrip() {
     try {
       await addTrip({
         origin: formData.origin.trim(),
+
         destination: formData.destination.trim(),
+
         budget: Number(formData.budget),
+
         travelers: Number(formData.travelers),
+
         travelStyle: formData.travelStyle.trim(),
 
-        dates: {
-          start: formData.startDate || null,
-          end: formData.endDate || null,
-        },
+        // FIX:
+        // Send dates using the names expected by the serializer.
+        startDate: formData.startDate || null,
+
+        endDate: formData.endDate || null,
 
         favorite: false,
+
         itinerary: [],
+
         packingList: [],
+
         recommendations: null,
       });
 
       navigate("/dashboard/trips");
     } catch (submitError) {
       console.error("Error creating trip:", submitError);
+
       setError("Could not create the trip. Please try again.");
     }
   };
@@ -287,6 +312,7 @@ function CreateTrip() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
+
       <button
         type="button"
         onClick={() => navigate("/dashboard/trips")}
@@ -297,6 +323,7 @@ function CreateTrip() {
       </button>
 
       {/* Header */}
+
       <div className="relative overflow-hidden rounded-3xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 sm:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg">
@@ -316,16 +343,15 @@ function CreateTrip() {
       </div>
 
       {/* Form */}
+
       <form
         onSubmit={handleSubmit}
         className="mt-8 rounded-3xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 sm:p-8 shadow-xl"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Starting Location */}
-          <FormField
-            label="Starting Location"
-            icon={<LocateFixed size={19} />}
-          >
+
+          <FormField label="Starting Location" icon={<LocateFixed size={19} />}>
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
@@ -372,10 +398,8 @@ function CreateTrip() {
           </FormField>
 
           {/* Destination */}
-          <FormField
-            label="Destination"
-            icon={<MapPin size={19} />}
-          >
+
+          <FormField label="Destination" icon={<MapPin size={19} />}>
             <div className="relative">
               <div className="relative">
                 <input
@@ -401,25 +425,22 @@ function CreateTrip() {
                 )}
               </div>
 
-              {showDestinationResults &&
-                destinationResults.length > 0 && (
-                  <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 shadow-xl">
-                    {destinationResults.map((place) => (
-                      <button
-                        key={place.place_id}
-                        type="button"
-                        onClick={() => selectDestination(place)}
-                        className="flex w-full items-center gap-3 border-b border-gray-100 dark:border-white/5 px-4 py-3 text-left text-sm text-gray-700 dark:text-white/80 hover:bg-cyan-50 dark:hover:bg-white/10 transition last:border-b-0"
-                      >
-                        <MapPin
-                          size={16}
-                          className="shrink-0 text-cyan-500"
-                        />
-                        <span>{place.display_name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+              {showDestinationResults && destinationResults.length > 0 && (
+                <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 shadow-xl">
+                  {destinationResults.map((place) => (
+                    <button
+                      key={place.place_id}
+                      type="button"
+                      onClick={() => selectDestination(place)}
+                      className="flex w-full items-center gap-3 border-b border-gray-100 dark:border-white/5 px-4 py-3 text-left text-sm text-gray-700 dark:text-white/80 hover:bg-cyan-50 dark:hover:bg-white/10 transition last:border-b-0"
+                    >
+                      <MapPin size={16} className="shrink-0 text-cyan-500" />
+
+                      <span>{place.display_name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {!destinationLoading &&
                 formData.destination.trim().length >= 2 &&
@@ -433,6 +454,7 @@ function CreateTrip() {
           </FormField>
 
           {/* Budget */}
+
           <FormField label="Budget" icon={<Wallet size={19} />}>
             <input
               required
@@ -447,6 +469,7 @@ function CreateTrip() {
           </FormField>
 
           {/* Travelers */}
+
           <FormField label="Travelers" icon={<Users size={19} />}>
             <input
               required
@@ -461,6 +484,7 @@ function CreateTrip() {
           </FormField>
 
           {/* Travel Style */}
+
           <FormField label="Travel Style" icon={<Compass size={19} />}>
             <input
               name="travelStyle"
@@ -472,6 +496,7 @@ function CreateTrip() {
           </FormField>
 
           {/* Start Date */}
+
           <FormField label="Start Date" icon={<CalendarDays size={19} />}>
             <input
               required
@@ -485,6 +510,7 @@ function CreateTrip() {
           </FormField>
 
           {/* End Date */}
+
           <FormField label="End Date" icon={<CalendarDays size={19} />}>
             <input
               required
@@ -499,6 +525,7 @@ function CreateTrip() {
         </div>
 
         {/* Error */}
+
         {error && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 dark:bg-red-500/10 dark:border-red-500/30 px-4 py-3 text-red-600 dark:text-red-400">
             {error}
@@ -506,6 +533,7 @@ function CreateTrip() {
         )}
 
         {/* Buttons */}
+
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
           <button
             type="button"
@@ -533,6 +561,7 @@ function FormField({ label, icon, children }) {
     <div>
       <label className="flex items-center gap-2 mb-2.5 text-sm font-medium text-gray-700 dark:text-white/90">
         <span className="text-cyan-500">{icon}</span>
+
         {label}
       </label>
 
