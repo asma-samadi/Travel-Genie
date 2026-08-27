@@ -15,8 +15,39 @@ export function TripProvider({ children }) {
   const { user } = useAuth();
 
   const [trips, setTrips] = useState([]);
-
   const [loading, setLoading] = useState(false);
+
+  // ---------------------------------------------------------
+  // Normalize trip data
+  // Keeps the original API fields while also providing
+  // the dates structure used throughout the frontend.
+  // ---------------------------------------------------------
+  const normalizeTrip = (trip) => {
+    if (!trip) return trip;
+
+    const startDate =
+      trip.dates?.start || trip.start_date || trip.startDate || null;
+
+    const endDate = trip.dates?.end || trip.end_date || trip.endDate || null;
+
+    return {
+      ...trip,
+
+      origin: trip.origin || trip.startingLocation || trip.from || "",
+
+      destination: trip.destination || trip.to || "",
+
+      travelers: trip.travelers ?? 1,
+
+      dates: {
+        start: startDate,
+        end: endDate,
+      },
+
+      start_date: startDate,
+      end_date: endDate,
+    };
+  };
 
   const loadTrips = async () => {
     const token = localStorage.getItem("access");
@@ -34,10 +65,9 @@ export function TripProvider({ children }) {
 
       console.log("TRIPS API RESPONSE:", data);
 
-      setTrips(Array.isArray(data) ? data : []);
+      setTrips(Array.isArray(data) ? data.map(normalizeTrip) : []);
     } catch (error) {
       console.error("Error loading trips:", error);
-
       setTrips([]);
     } finally {
       setLoading(false);
@@ -55,9 +85,11 @@ export function TripProvider({ children }) {
   const addTrip = async (tripData) => {
     const newTrip = await createTripAPI(tripData);
 
-    setTrips((currentTrips) => [...currentTrips, newTrip]);
+    const normalizedTrip = normalizeTrip(newTrip);
 
-    return newTrip;
+    setTrips((currentTrips) => [...currentTrips, normalizedTrip]);
+
+    return normalizedTrip;
   };
 
   const updateTrip = async (id, tripData) => {
@@ -65,19 +97,21 @@ export function TripProvider({ children }) {
 
     console.log("UPDATED TRIP API RESPONSE:", updatedTrip);
 
+    const normalizedTrip = normalizeTrip(updatedTrip);
+
     setTrips((currentTrips) =>
       currentTrips.map((trip) =>
         String(trip.id) === String(id)
           ? {
               ...trip,
               ...tripData,
-              ...updatedTrip,
+              ...normalizedTrip,
             }
           : trip,
       ),
     );
 
-    return updatedTrip;
+    return normalizedTrip;
   };
 
   const deleteTrip = async (id) => {
@@ -100,13 +134,15 @@ export function TripProvider({ children }) {
 
     const updatedTrip = await updateTripAPI(id, tripData);
 
+    const normalizedTrip = normalizeTrip(updatedTrip);
+
     setTrips((currentTrips) =>
       currentTrips.map((item) =>
         String(item.id) === String(id)
           ? {
               ...item,
               ...tripData,
-              ...updatedTrip,
+              ...normalizedTrip,
             }
           : item,
       ),

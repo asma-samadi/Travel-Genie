@@ -1,8 +1,10 @@
 from rest_framework import serializers
+
 from .models import Trip
 
 
 class TripSerializer(serializers.ModelSerializer):
+
     travelStyle = serializers.CharField(
         source="travel_style",
         required=False,
@@ -14,12 +16,14 @@ class TripSerializer(serializers.ModelSerializer):
         required=False
     )
 
-    start_date = serializers.DateField(
+    startDate = serializers.DateField(
+        source="start_date",
         required=False,
         allow_null=True
     )
 
-    end_date = serializers.DateField(
+    endDate = serializers.DateField(
+        source="end_date",
         required=False,
         allow_null=True
     )
@@ -28,6 +32,7 @@ class TripSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Trip
+
         fields = [
             "id",
             "origin",
@@ -35,8 +40,8 @@ class TripSerializer(serializers.ModelSerializer):
             "budget",
             "travelStyle",
             "travelers",
-            "start_date",
-            "end_date",
+            "startDate",
+            "endDate",
             "dates",
             "itinerary",
             "packingList",
