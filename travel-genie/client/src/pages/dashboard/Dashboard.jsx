@@ -13,6 +13,7 @@ import CalendarCard from "../../components/dashboard/CalendarCard.jsx";
 import UpcomingTrips from "../../components/dashboard/UpcomingTrips.jsx";
 import TripRoute from "../../components/dashboard/TripRoute.jsx";
 import WeatherCard from "../../components/dashboard/WeatherCard.jsx";
+import MessagesCard from "../../components/dashboard/MessagesCard.jsx";
 
 function Dashboard() {
   return (
@@ -191,65 +192,10 @@ function Dashboard() {
         </div>
 
         {/* =====================================================
-            BOTTOM ROW
-            Messages
-            ===================================================== */}
-        <section
-          className="
-            relative
-            min-h-[120px]
-            overflow-hidden
-            rounded-[28px]
-            border
-            border-gray-200/70
-            bg-white/80
-            p-5
-            shadow-[0_8px_30px_rgba(0,0,0,0.04)]
-            backdrop-blur-xl
-            dark:border-white/10
-            dark:bg-white/5
-          "
-        >
-          <div
-            className="
-              absolute
-              -right-12
-              -top-12
-              h-36
-              w-36
-              rounded-full
-              bg-cyan-400/10
-              blur-3xl
-            "
-          />
-
-          <div className="relative flex items-center gap-3">
-            <div
-              className="
-                flex
-                h-11
-                w-11
-                shrink-0
-                items-center
-                justify-center
-                rounded-2xl
-                bg-cyan-500/10
-                text-cyan-500
-              "
-            >
-              <MessageCircle size={21} />
-            </div>
-
-            <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Messages
-              </h2>
-              <p className="mt-1 text-xs text-gray-500 dark:text-white/50">
-                Important travel updates and messages will appear here.
-              </p>
-            </div>
-          </div>
-        </section>
+          BOTTOM ROW
+          Messages
+          ===================================================== */}
+        <MessagesCard />
       </div>
     </div>
   );
