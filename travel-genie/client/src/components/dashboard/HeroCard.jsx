@@ -210,7 +210,7 @@ function HeroCard() {
 
   if (loading) {
     return (
-      <div className="h-[300px] animate-pulse rounded-3xl bg-gray-200 dark:bg-white/10" />
+      <div className="h-full min-h-[220px] animate-pulse rounded-3xl bg-gray-200 dark:bg-white/10" />
     );
   }
 
@@ -220,22 +220,22 @@ function HeroCard() {
 
   if (!heroTrip) {
     return (
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-700 p-6 text-white sm:p-8">
+      <div className="relative h-full min-h-[220px] overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-700 p-5 text-white sm:p-6">
         <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
 
         <div className="absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-cyan-300/20 blur-3xl" />
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium backdrop-blur-md">
-            <Sparkles size={16} />
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-1 py-1.5 text-sm font-medium backdrop-blur-md">
+            <Sparkles size={14} />
             Welcome to TravelGenie
           </div>
 
-          <h1 className="mt-4 max-w-2xl text-3xl font-bold sm:text-4xl">
+          <h1 className="mt-4 max-w-2xl text-1xl font-bold sm:text-1.5xl">
             Your next adventure starts here ✈️
           </h1>
 
-          <p className="mt-3 max-w-xl text-white/80">
+          <p className="mt-2 max-w-la text-white/80">
             Create a trip and let TravelGenie help you plan an unforgettable
             journey.
           </p>
@@ -270,7 +270,8 @@ function HeroCard() {
       onClick={() => navigate(`/dashboard/trips/${heroTrip.id}`)}
       className="
         relative
-        min-h-[300px]
+        h-full
+        min-h-[220px]
         cursor-pointer
         overflow-hidden
         rounded-3xl
@@ -313,7 +314,7 @@ function HeroCard() {
 
       {/* CONTENT */}
 
-      <div className="relative z-10 flex min-h-[300px] flex-col justify-between p-6 sm:p-8">
+      <div className="relative z-10 flex h-full min-h-[220px] flex-col justify-between p-5 sm:p-6">
         <div>
           {/* STATUS */}
 
@@ -325,7 +326,7 @@ function HeroCard() {
 
           {/* TITLE */}
 
-          <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
+          <h1 className="mt-4 text-3xl font-bold text-white sm:text-3xl md:text-3xl">
             {heroTrip.title || heroTrip.destination}
           </h1>
 

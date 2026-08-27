@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import { ArrowLeftRight, ChevronDown, Search, X } from "lucide-react";
-
 import { useTrips } from "../../context/TripContext.jsx";
 
 const destinationCurrencies = {
@@ -31,13 +29,7 @@ const destinationCurrencies = {
 // CURRENCY PICKER
 // =====================================================
 
-function CurrencyPicker({
-  value,
-  onChange,
-  currencies,
-  label,
-  dark = false,
-}) {
+function CurrencyPicker({ value, onChange, currencies, label, dark = false }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -97,15 +89,13 @@ function CurrencyPicker({
       <button
         type="button"
         onClick={() => setOpen((previous) => !previous)}
-        className={`flex w-full items-center justify-between gap-1.5 text-left ${
-          dark
-            ? "text-white"
-            : "text-gray-800 dark:text-white"
+        className={`flex w-full min-w-0 items-center justify-between gap-1 text-left ${
+          dark ? "text-white" : "text-gray-800 dark:text-white"
         }`}
         aria-label={label}
         aria-expanded={open}
       >
-        <span className="min-w-0 truncate text-[11px] font-semibold">
+        <span className="min-w-0 flex-1 truncate text-[11px] font-semibold">
           {selectedCurrency
             ? `${selectedCurrency.code} — ${selectedCurrency.name}`
             : value}
@@ -115,11 +105,7 @@ function CurrencyPicker({
           size={14}
           className={`shrink-0 transition-transform ${
             open ? "rotate-180" : ""
-          } ${
-            dark
-              ? "text-white/70"
-              : "text-gray-600 dark:text-white/60"
-          }`}
+          } ${dark ? "text-white/70" : "text-gray-600 dark:text-white/60"}`}
         />
       </button>
 
@@ -128,8 +114,8 @@ function CurrencyPicker({
         <div
           className="
             absolute left-1/2 top-full z-[100] mt-2
-            w-[280px] -translate-x-1/2 overflow-hidden
-            rounded-2xl border border-gray-200 bg-white
+            w-[280px] max-w-[calc(100vw-2rem)] -translate-x-1/2
+            overflow-hidden rounded-2xl border border-gray-200 bg-white
             shadow-2xl
             dark:border-white/10 dark:bg-[#10252b]
             sm:w-[320px]
@@ -139,7 +125,7 @@ function CurrencyPicker({
           <div className="border-b border-gray-200 p-3 dark:border-white/10">
             <div
               className="
-                flex h-10 items-center gap-2.5 rounded-xl
+                flex h-10 min-w-0 items-center gap-2.5 rounded-xl
                 border border-gray-200 bg-gray-50 px-3
                 dark:border-white/10 dark:bg-white/10
               "
@@ -197,7 +183,7 @@ function CurrencyPicker({
                   type="button"
                   onClick={() => handleSelect(currency.code)}
                   className={`
-                    flex min-h-[46px] w-full items-center justify-between
+                    flex min-h-[46px] w-full min-w-0 items-center justify-between
                     gap-3 rounded-xl px-3 py-2.5 text-left transition
                     ${
                       currency.code === value
@@ -206,10 +192,8 @@ function CurrencyPicker({
                     }
                   `}
                 >
-                  <span className="min-w-0 truncate">
-                    <span className="text-sm font-bold">
-                      {currency.code}
-                    </span>
+                  <span className="min-w-0 flex-1 truncate">
+                    <span className="text-sm font-bold">{currency.code}</span>
 
                     <span className="ml-2 text-sm text-gray-600 dark:text-white/50">
                       {currency.name}
@@ -277,9 +261,7 @@ function ExchangeCard() {
   const latestTrip = useMemo(() => {
     if (!Array.isArray(trips) || trips.length === 0) return null;
 
-    return [...trips].sort(
-      (a, b) => Number(b.id) - Number(a.id),
-    )[0];
+    return [...trips].sort((a, b) => Number(b.id) - Number(a.id))[0];
   }, [trips]);
 
   // =====================================================
@@ -312,9 +294,7 @@ function ExchangeCard() {
             name: currency.name,
             symbol: currency.symbol || "",
           }))
-          .filter(
-            (currency) => currency.code && currency.name,
-          )
+          .filter((currency) => currency.code && currency.name)
           .sort((a, b) => a.code.localeCompare(b.code));
 
         setCurrencies(formattedCurrencies);
@@ -343,11 +323,8 @@ function ExchangeCard() {
       return;
     }
 
-    const foundCountry = Object.keys(destinationCurrencies).find(
-      (country) =>
-        destination
-          .toLowerCase()
-          .includes(country.toLowerCase()),
+    const foundCountry = Object.keys(destinationCurrencies).find((country) =>
+      destination.toLowerCase().includes(country.toLowerCase()),
     );
 
     if (foundCountry) {
@@ -406,9 +383,7 @@ function ExchangeCard() {
   // =====================================================
 
   const convertedAmount =
-    rate !== null &&
-    amount !== "" &&
-    !Number.isNaN(Number(amount))
+    rate !== null && amount !== "" && !Number.isNaN(Number(amount))
       ? Number(amount) * Number(rate)
       : null;
 
@@ -468,11 +443,9 @@ function ExchangeCard() {
       <div className="min-w-0">
         <h2
           className="
-    truncate
-    font-semibold
-    text-gray-900
-                dark:text-white
-  "
+            truncate font-semibold text-gray-900
+            dark:text-white
+          "
         >
           Currency Exchange
         </h2>
@@ -536,10 +509,7 @@ function ExchangeCard() {
         >
           <ArrowLeftRight
             size={16}
-            className="
-              text-blue-600
-              dark:text-cyan-400
-            "
+            className="text-blue-600 dark:text-cyan-400"
           />
         </button>
 
@@ -554,7 +524,7 @@ function ExchangeCard() {
         >
           <div
             className="
-              truncate text-lg font-semibold
+              min-w-0 truncate text-lg font-semibold
               text-gray-800 dark:text-white
             "
           >
@@ -580,7 +550,7 @@ function ExchangeCard() {
 
       {/* EXCHANGE RATE */}
       {rate !== null && !exchangeLoading && (
-        <p className="mt-3 truncate text-[11px] font-medium text-gray-700 dark:text-white/70">
+        <p className="mt-3 min-w-0 truncate text-[11px] font-medium text-gray-700 dark:text-white/70">
           1 {fromCurrency} ={" "}
           {Number(rate).toLocaleString(undefined, {
             maximumFractionDigits: 4,
@@ -600,14 +570,14 @@ function ExchangeCard() {
 
       {/* ERROR */}
       {exchangeError && (
-        <p className="mt-3 truncate text-[11px] font-medium text-red-600 dark:text-red-400">
+        <p className="mt-3 min-w-0 truncate text-[11px] font-medium text-red-600 dark:text-red-400">
           {exchangeError}
         </p>
       )}
 
       {/* NO TRIP */}
       {!latestTrip && (
-        <p className="mt-3 truncate text-[11px] text-gray-700 dark:text-white/60">
+        <p className="mt-3 min-w-0 truncate text-[11px] text-gray-700 dark:text-white/60">
           Select any currencies you want to convert.
         </p>
       )}

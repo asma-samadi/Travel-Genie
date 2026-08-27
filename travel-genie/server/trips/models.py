@@ -3,11 +3,16 @@ from django.contrib.auth.models import User
 
 
 class Trip(models.Model):
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="trips"
+    )
+
+    origin = models.CharField(
+        max_length=255,
+        blank=True,
+        default=""
     )
 
     destination = models.CharField(
@@ -51,11 +56,9 @@ class Trip(models.Model):
         default=False
     )
 
-
     created_at = models.DateTimeField(
         auto_now_add=True
     )
-
 
     def __str__(self):
         return self.destination
