@@ -1,10 +1,8 @@
 from rest_framework import serializers
-
 from .models import Trip
 
 
 class TripSerializer(serializers.ModelSerializer):
-
     travelStyle = serializers.CharField(
         source="travel_style",
         required=False,
@@ -26,16 +24,13 @@ class TripSerializer(serializers.ModelSerializer):
         allow_null=True
     )
 
-    dates = serializers.SerializerMethodField(
-        read_only=True
-    )
+    dates = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Trip
-
         fields = [
             "id",
-            'origin',
+            "origin",
             "destination",
             "budget",
             "travelStyle",
@@ -59,22 +54,3 @@ class TripSerializer(serializers.ModelSerializer):
             "start": obj.start_date,
             "end": obj.end_date,
         }
-
-    def create(self, validated_data):
-        dates = self.initial_data.get("dates", {})
-
-        if dates:
-            validated_data["start_date"] = dates.get("start")
-            validated_data["end_date"] = dates.get("end")
-
-        return Trip.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        dates = self.initial_data.get("dates", {})
-
-        if dates:
-            validated_data["start_date"] = dates.get("start")
-            validated_data["end_date"] = dates.get("end")
-
-        return super().update(instance, validated_data)
-    
