@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { MapPin, Plane, Navigation, Route } from "lucide-react";
+
+import {
+  MapPin,
+  Plane,
+  Navigation,
+  Route,
+  CalendarDays,
+  Users,
+  ExternalLink,
+} from "lucide-react";
+
 import { useTrips } from "../../context/TripContext.jsx";
 
 function TripRoute() {
@@ -28,15 +38,11 @@ function TripRoute() {
   // 2. Otherwise, the nearest upcoming trip
   // ---------------------------------------------------------
 
-  // ---------------------------------------------------------
-  // Get the current trip or the nearest upcoming trip
-  // ---------------------------------------------------------
-
   const currentTrip = useMemo(() => {
     if (!trips || trips.length === 0) return null;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
 
     // 1. First, find a trip that is happening right now
     const activeTrip = trips.find((trip) => {
@@ -49,7 +55,7 @@ function TripRoute() {
       startDate.setHours(0, 0, 0, 0);
       endDate.setHours(23, 59, 59, 999);
 
-      return today >= startDate && today <= endDate;
+      return currentDate >= startDate && currentDate <= endDate;
     });
 
     if (activeTrip) return activeTrip;
@@ -62,7 +68,7 @@ function TripRoute() {
         const startDate = new Date(trip.dates.start);
         startDate.setHours(0, 0, 0, 0);
 
-        return startDate >= today;
+        return startDate >= currentDate;
       })
       .sort(
         (a, b) =>
@@ -84,23 +90,33 @@ function TripRoute() {
   }, [trips]);
 
   // ---------------------------------------------------------
-  // Get the real origin and destination from the selected trip
-  // ---------------------------------------------------------
+// Get the real origin and destination from the selected trip
+// ---------------------------------------------------------
 
-  const origin =
-    currentTrip?.origin?.trim() ||
-    currentTrip?.startingLocation?.trim() ||
-    currentTrip?.from?.trim() ||
-    "Starting location";
+const origin =
+  currentTrip?.origin?.trim() ||
+  currentTrip?.startingLocation?.trim() ||
+  currentTrip?.from?.trim() ||
+  "";
 
-  const destination =
-    currentTrip?.destination?.trim() ||
-    currentTrip?.to?.trim() ||
-    "Destination";
+const destination =
+  currentTrip?.destination?.trim() ||
+  currentTrip?.to?.trim() ||
+  "";
 
-   console.log("Selected trip:", currentTrip);
-   console.log("Trip keys:", Object.keys(currentTrip || {}));
-   console.log("Selected trip JSON:", JSON.stringify(currentTrip, null, 2));
+const displayOrigin = origin || "Starting location";
+const displayDestination = destination || "Destination";
+
+// Get departure date and travelers from the selected trip
+const departureDate =
+  currentTrip?.dates?.start ||
+  currentTrip?.start_date ||
+  "";
+
+const travelers = currentTrip?.travelers ?? 1;
+
+// Official Kam Air booking website
+const kamAirBookingUrl = "https://www.kamair.com/";
 
   // ---------------------------------------------------------
   // Geocode the real origin and destination
@@ -115,6 +131,7 @@ function TripRoute() {
           origin: null,
           destination: null,
         });
+
         setGeocoding(false);
         return;
       }
@@ -227,12 +244,32 @@ function TripRoute() {
   }, [distance]);
 
   // ---------------------------------------------------------
+  // Format trip departure date
+  // ---------------------------------------------------------
+
+  const formattedDepartureDate = useMemo(() => {
+    if (!departureDate) return "Date unavailable";
+
+    const date = new Date(`${departureDate}T00:00:00`);
+
+    if (Number.isNaN(date.getTime())) {
+      return "Date unavailable";
+    }
+
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }, [departureDate]);
+
+  // ---------------------------------------------------------
   // Empty state
   // ---------------------------------------------------------
 
   if (!currentTrip) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center text-center py-10">
+      <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 text-blue-600 dark:text-cyan-400">
           <Plane size={34} strokeWidth={2} />
         </div>
@@ -393,6 +430,76 @@ function TripRoute() {
               ? `${formattedDistance} away`
               : "Distance unavailable"}
         </span>
+      </div>
+
+      {/* Kam Air Flight Information */}
+      <div className="mx-auto mt-4 w-full max-w-md rounded-2xl bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-purple-500/5 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/20">
+              <Plane size={18} />
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                Kam Air
+              </p>
+
+              <p className="text-[11px] text-gray-500 dark:text-white/50">
+                Flight availability & fare
+              </p>
+            </div>
+          </div>
+
+          <a
+            href={kamAirBookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 px-3 py-2 text-xs font-semibold text-white shadow-md transition hover:scale-[1.02]"
+          >
+            Book Ticket
+            <ExternalLink size={13} />
+          </a>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-2 rounded-xl bg-white/60 px-3 py-2 dark:bg-white/5">
+            <CalendarDays
+              size={15}
+              className="shrink-0 text-blue-600 dark:text-cyan-400"
+            />
+
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-500 dark:text-white/50">
+                Departure
+              </p>
+              <p className="truncate text-xs font-medium text-gray-700 dark:text-white/80">
+                {formattedDepartureDate}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-xl bg-white/60 px-3 py-2 dark:bg-white/5">
+            <Users
+              size={15}
+              className="shrink-0 text-blue-600 dark:text-cyan-400"
+            />
+
+            <div>
+              <p className="text-[10px] text-gray-500 dark:text-white/50">
+                Travelers
+              </p>
+              <p className="text-xs font-medium text-gray-700 dark:text-white/80">
+                {travelers} {travelers === 1 ? "Traveler" : "Travelers"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-3 text-center text-[11px] text-gray-500 dark:text-white/45">
+          Check the official booking page for live flight availability and
+          current ticket prices.
+        </p>
       </div>
 
       {/* Airplane Animation */}

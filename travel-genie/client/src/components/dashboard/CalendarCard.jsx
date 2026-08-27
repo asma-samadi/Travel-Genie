@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import { useTrips } from "../../context/TripContext.jsx";
 
 function CalendarCard() {
@@ -28,35 +30,82 @@ function CalendarCard() {
   const month = currentDate.getMonth();
 
   const firstDay = new Date(year, month, 1).getDay();
+
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const today = new Date();
 
   // =====================================================
   // GET TRIP START DATE
+  // Supports the existing possible trip structures
   // =====================================================
 
-  const getTripStartDate = (trip) =>
-    trip.startDate ||
-    trip.start_date ||
-    trip.start ||
-    trip.departureDate ||
-    trip.departure_date ||
-    trip.dates?.start ||
-    null;
+  const getTripStartDate = (trip) => {
+    if (!trip) return null;
+
+    return (
+      trip?.dates?.start ||
+      trip?.dates?.startDate ||
+      trip?.dates?.departure ||
+      trip?.startDate ||
+      trip?.start_date ||
+      trip?.departureDate ||
+      trip?.departure_date ||
+      trip?.date ||
+      trip?.start ||
+      trip?.fromDate ||
+      trip?.from_date ||
+      null
+    );
+  };
 
   // =====================================================
   // GET TRIP END DATE
+  // Supports the existing possible trip structures
   // =====================================================
 
-  const getTripEndDate = (trip) =>
-    trip.endDate ||
-    trip.end_date ||
-    trip.end ||
-    trip.returnDate ||
-    trip.return_date ||
-    trip.dates?.end ||
-    null;
+  const getTripEndDate = (trip) => {
+    if (!trip) return null;
+
+    return (
+      trip?.dates?.end ||
+      trip?.dates?.endDate ||
+      trip?.dates?.return ||
+      trip?.endDate ||
+      trip?.end_date ||
+      trip?.returnDate ||
+      trip?.return_date ||
+      trip?.end ||
+      trip?.toDate ||
+      trip?.to_date ||
+      getTripStartDate(trip)
+    );
+  };
+
+  // =====================================================
+  // SAFELY PARSE DATE
+  // =====================================================
+
+  const parseTripDate = (value) => {
+    if (!value) return null;
+
+    let date;
+
+    // YYYY-MM-DD should be treated as a local calendar date
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      date = new Date(`${value}T00:00:00`);
+    } else {
+      date = new Date(value);
+    }
+
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    date.setHours(0, 0, 0, 0);
+
+    return date;
+  };
 
   // =====================================================
   // PREPARE TRIP DATE RANGES
@@ -70,24 +119,15 @@ function CalendarCard() {
         const startValue = getTripStartDate(trip);
         const endValue = getTripEndDate(trip);
 
-        if (!startValue) return null;
+        const start = parseTripDate(startValue);
+        const end = parseTripDate(endValue);
 
-        const start = new Date(startValue);
-
-        const end = endValue ? new Date(endValue) : new Date(startValue);
-
-        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-          return null;
-        }
-
-        // Remove time for accurate date comparison
-        start.setHours(0, 0, 0, 0);
-        end.setHours(0, 0, 0, 0);
+        if (!start) return null;
 
         return {
-          id: trip.id,
+          id: trip?.id,
           start,
-          end: end < start ? start : end,
+          end: end && end >= start ? end : start,
         };
       })
       .filter(Boolean);
@@ -184,19 +224,13 @@ function CalendarCard() {
     min-h-[220px]
     overflow-hidden
     rounded-[28px]
-
     border
     border-white/50
-
     bg-[#B8C0C5]
-
     px-4
     py-3
-
     shadow-[0_8px_30px_rgba(0,0,0,0.05)]
-
     backdrop-blur-xl
-
     dark:border-white/10
     dark:bg-white/[0.06]
   "
@@ -214,7 +248,6 @@ function CalendarCard() {
           from-white/20
           via-transparent
           to-transparent
-
           dark:from-white/[0.03]
         "
       />
@@ -263,20 +296,13 @@ function CalendarCard() {
                 items-center
                 justify-center
                 rounded-full
-
                 border
                 border-gray-200
-
                 bg-gray-50
-
                 text-gray-600
-
                 transition
-
                 hover:bg-gray-100
-
                 active:scale-90
-
                 dark:border-white/10
                 dark:bg-white/5
                 dark:text-white/60
@@ -297,20 +323,13 @@ function CalendarCard() {
                 items-center
                 justify-center
                 rounded-full
-
                 border
                 border-gray-200
-
                 bg-gray-50
-
                 text-gray-600
-
                 transition
-
                 hover:bg-gray-100
-
                 active:scale-90
-
                 dark:border-white/10
                 dark:bg-white/5
                 dark:text-white/60
@@ -378,12 +397,9 @@ function CalendarCard() {
                     min-h-[22px]
                     items-center
                     justify-center
-
                     text-[9px]
                     font-medium
-
                     transition
-
                     active:scale-90
 
                     ${
@@ -393,9 +409,7 @@ function CalendarCard() {
                           from-cyan-500/10
                           via-blue-500/10
                           to-purple-500/10
-
                           text-blue-700
-
                           dark:text-cyan-300
                         `
                         : ""
@@ -405,14 +419,11 @@ function CalendarCard() {
                       status === "start"
                         ? `
                           rounded-l-full
-
                           bg-gradient-to-r
                           from-cyan-500
                           via-blue-500
                           to-purple-500
-
                           text-white
-
                           shadow-[0_3px_10px_rgba(59,130,246,0.25)]
                         `
                         : ""
@@ -422,14 +433,11 @@ function CalendarCard() {
                       status === "end"
                         ? `
                           rounded-r-full
-
                           bg-gradient-to-r
                           from-cyan-500
                           via-blue-500
                           to-purple-500
-
                           text-white
-
                           shadow-[0_3px_10px_rgba(139,92,246,0.25)]
                         `
                         : ""
@@ -439,14 +447,11 @@ function CalendarCard() {
                       status === "single"
                         ? `
                           rounded-full
-
                           bg-gradient-to-r
                           from-cyan-500
                           via-blue-500
                           to-purple-500
-
                           text-white
-
                           shadow-[0_3px_10px_rgba(59,130,246,0.25)]
                         `
                         : ""
@@ -456,12 +461,9 @@ function CalendarCard() {
                       !status && todayDate
                         ? `
                           rounded-full
-
                           border
                           border-[#00B1E2]
-
                           text-[#009AC5]
-
                           dark:text-cyan-300
                         `
                         : ""
@@ -471,11 +473,8 @@ function CalendarCard() {
                       !status && !todayDate
                         ? `
                           rounded-full
-
                           text-gray-700
-
                           hover:bg-gray-100
-
                           dark:text-white/70
                           dark:hover:bg-white/10
                         `

@@ -1,58 +1,109 @@
 import { CalendarDays, MapPin, ArrowRight } from "lucide-react";
+
 import { useMemo } from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import { useTrips } from "../../context/TripContext.jsx";
 
 function UpcomingTrips() {
   const { trips, loading } = useTrips();
+
   const navigate = useNavigate();
 
   // ======================================================
   // GET TRIP START DATE
   // ======================================================
+
   const getTripStartDate = (trip) => {
+    if (!trip) return null;
+
     return (
       trip?.dates?.start ||
+      trip?.dates?.startDate ||
+      trip?.dates?.departure ||
       trip?.startDate ||
       trip?.start_date ||
+      trip?.departureDate ||
+      trip?.departure_date ||
       trip?.date ||
       trip?.start ||
+      trip?.fromDate ||
+      trip?.from_date ||
       null
     );
   };
 
   // ======================================================
+  // SAFELY PARSE DATE
+  // ======================================================
+
+  const parseTripDate = (value) => {
+    if (!value) return null;
+
+    let date;
+
+    // Handle YYYY-MM-DD correctly as a local date
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      date = new Date(`${value}T00:00:00`);
+    } else {
+      date = new Date(value);
+    }
+
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    return date;
+  };
+
+  // ======================================================
   // GET ONLY THE NEXT 2 UPCOMING TRIPS
   // ======================================================
+
   const upcomingTrips = useMemo(() => {
     if (!Array.isArray(trips)) return [];
 
     const now = new Date();
 
-    return trips
-      .map((trip) => {
-        const startDateValue = getTripStartDate(trip);
+    // Start of today
+    const today = new Date();
 
-        if (!startDateValue) return null;
+    today.setHours(0, 0, 0, 0);
 
-        const startDate = new Date(startDateValue);
+    return (
+      trips
+        .map((trip) => {
+          const startDateValue = getTripStartDate(trip);
 
-        if (Number.isNaN(startDate.getTime())) return null;
+          if (!startDateValue) return null;
 
-        return {
-          ...trip,
-          parsedStartDate: startDate,
-        };
-      })
-      .filter(Boolean)
-      .filter((trip) => trip.parsedStartDate >= now)
-      .sort((a, b) => a.parsedStartDate.getTime() - b.parsedStartDate.getTime())
-      .slice(0, 2);
+          const startDate = parseTripDate(startDateValue);
+
+          if (!startDate) return null;
+
+          return {
+            ...trip,
+            parsedStartDate: startDate,
+          };
+        })
+        .filter(Boolean)
+
+        // Include trips happening today
+        .filter((trip) => trip.parsedStartDate >= today)
+
+        .sort(
+          (a, b) => a.parsedStartDate.getTime() - b.parsedStartDate.getTime(),
+        )
+
+        .slice(0, 2)
+    );
   }, [trips]);
 
   // ======================================================
   // FORMAT DATE
   // ======================================================
+
   const formatDate = (date) => {
     return date.toLocaleDateString("en-US", {
       month: "short",
@@ -64,6 +115,7 @@ function UpcomingTrips() {
   // ======================================================
   // LOADING
   // ======================================================
+
   if (loading) {
     return (
       <section
@@ -132,6 +184,7 @@ function UpcomingTrips() {
       "
     >
       {/* Decorative gradient glow */}
+
       <div
         className="
           pointer-events-none
@@ -152,6 +205,7 @@ function UpcomingTrips() {
       {/* ==================================================
           HEADER
       ================================================== */}
+
       <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
@@ -180,6 +234,7 @@ function UpcomingTrips() {
         </div>
 
         {/* See All */}
+
         <button
           type="button"
           onClick={() => navigate("/dashboard/trips")}
@@ -204,6 +259,7 @@ function UpcomingTrips() {
       {/* ==================================================
           TRIPS
       ================================================== */}
+
       <div className="relative mt-5">
         {upcomingTrips.length === 0 ? (
           <div className="flex items-center justify-center py-6">
@@ -240,6 +296,7 @@ function UpcomingTrips() {
                 "
               >
                 {/* Icon */}
+
                 <div
                   className="
                     flex
@@ -260,6 +317,7 @@ function UpcomingTrips() {
                 </div>
 
                 {/* Trip information */}
+
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
                     {trip.title || trip.destination || "Travel Adventure"}
@@ -278,6 +336,7 @@ function UpcomingTrips() {
                 </div>
 
                 {/* Arrow */}
+
                 <ArrowRight
                   size={15}
                   className="
