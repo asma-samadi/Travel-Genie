@@ -1,9 +1,10 @@
 from rest_framework import serializers
+
 from .models import Trip
 
 
 class TripSerializer(serializers.ModelSerializer):
-    # Frontend uses camelCase, Django model uses snake_case
+
     travelStyle = serializers.CharField(
         source="travel_style",
         required=False,
@@ -13,12 +14,6 @@ class TripSerializer(serializers.ModelSerializer):
     packingList = serializers.JSONField(
         source="packing_list",
         required=False
-    )
-
-    origin = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        default=""
     )
 
     start_date = serializers.DateField(
@@ -31,13 +26,16 @@ class TripSerializer(serializers.ModelSerializer):
         allow_null=True
     )
 
-    dates = serializers.SerializerMethodField(read_only=True)
+    dates = serializers.SerializerMethodField(
+        read_only=True
+    )
 
     class Meta:
         model = Trip
+
         fields = [
             "id",
-            "origin",
+            'origin',
             "destination",
             "budget",
             "travelStyle",
@@ -79,3 +77,4 @@ class TripSerializer(serializers.ModelSerializer):
             validated_data["end_date"] = dates.get("end")
 
         return super().update(instance, validated_data)
+    
