@@ -12,6 +12,7 @@ import ExchangeCard from "../../components/dashboard/ExchangeCard.jsx";
 import CalendarCard from "../../components/dashboard/CalendarCard.jsx";
 import UpcomingTrips from "../../components/dashboard/UpcomingTrips.jsx";
 import TripRoute from "../../components/dashboard/TripRoute.jsx";
+import WeatherCard from "../../components/dashboard/WeatherCard.jsx";
 
 function Dashboard() {
   return (
@@ -185,68 +186,7 @@ function Dashboard() {
             <UpcomingTrips />
 
             {/* Weather */}
-            <section
-              className="
-                relative
-                min-h-0
-                overflow-hidden
-                rounded-[28px]
-                border
-                border-gray-200/70
-                bg-white/80
-                p-5
-                shadow-[0_8px_30px_rgba(0,0,0,0.04)]
-                backdrop-blur-xl
-                dark:border-white/10
-                dark:bg-white/5
-              "
-            >
-              <div
-                className="
-                  absolute
-                  -bottom-10
-                  -right-10
-                  h-28
-                  w-28
-                  rounded-full
-                  bg-cyan-400/10
-                  blur-2xl
-                "
-              />
-
-              <div className="relative flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-10
-                    w-10
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-2xl
-                    bg-cyan-500/10
-                    text-cyan-500
-                  "
-                >
-                  <CloudSun size={19} />
-                </div>
-
-                <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-                    Weather
-                  </h2>
-                  <p className="mt-0.5 text-[11px] text-gray-500 dark:text-white/50">
-                    Destination forecast
-                  </p>
-                </div>
-              </div>
-
-              <div className="relative mt-5 flex items-center justify-center">
-                <p className="text-xs text-gray-400 dark:text-white/40">
-                  Select a destination to see weather
-                </p>
-              </div>
-            </section>
+            <WeatherCard />
           </div>
         </div>
 

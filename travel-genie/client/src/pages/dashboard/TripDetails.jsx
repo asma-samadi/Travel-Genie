@@ -1,9 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  Heart,
+  Tag,
   Calendar,
   Users,
   Wallet,
@@ -20,14 +19,14 @@ import {
   RefreshCw,
   CloudSun,
   Share2,
-  Clock,
+  FileDown,
   Hotel,
   Utensils,
   Car,
   Ticket,
-  Copy,
 } from "lucide-react";
 
+import { jsPDF } from "jspdf";
 import { generateAIResponse } from "../../services/ai";
 import { useTrips } from "../../context/TripContext.jsx";
 import GlassCard from "../../components/Common/GlassCard";
@@ -48,7 +47,6 @@ function TripDetails() {
   const [editingItinerary, setEditingItinerary] = useState(false);
   const [editedItinerary, setEditedItinerary] = useState([]);
   const [savingItinerary, setSavingItinerary] = useState(false);
-
   const [regeneratingDay, setRegeneratingDay] = useState(null);
 
   // ======================================================
@@ -57,26 +55,6 @@ function TripDetails() {
 
   const [packingLoading, setPackingLoading] = useState(false);
   const [packingError, setPackingError] = useState("");
-
-  // ======================================================
-  // AI RECOMMENDATIONS STATES
-  // ======================================================
-
-  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
-  const [recommendationsError, setRecommendationsError] = useState("");
-
-  const [selectedInterests, setSelectedInterests] = useState([]);
-
-  const interests = [
-    "History",
-    "Nature",
-    "Food",
-    "Shopping",
-    "Culture",
-    "Adventure",
-    "Relaxation",
-    "Photography",
-  ];
 
   // ======================================================
   // WEATHER STATES
@@ -100,34 +78,155 @@ function TripDetails() {
   const [shareMessage, setShareMessage] = useState("");
 
   // ======================================================
-  // FIND TRIP
+  // DOWNLOAD TRIP AS PDF
   // ======================================================
 
-  const trip = trips.find((item) => String(item.id) === String(id));
+  const downloadTripPDF = () => {
+    if (!trip) return;
+
+    const pdf = new jsPDF();
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+
+    let y = 20;
+
+    const addText = (text, size = 11, spacing = 7) => {
+      pdf.setFontSize(size);
+
+      const lines = pdf.splitTextToSize(String(text || ""), contentWidth);
+
+      if (y + lines.length * spacing > 275) {
+        pdf.addPage();
+        y = 20;
+      }
+
+      pdf.text(lines, margin, y);
+      y += lines.length * spacing;
+    };
+
+    // Title
+    pdf.setFontSize(22);
+    pdf.setFont("helvetica", "bold");
+
+    const title = trip.title || `${trip.destination} Trip`;
+
+    pdf.text(title, margin, y);
+    y += 12;
+
+    // Basic information
+    pdf.setFont("helvetica", "normal");
+    addText(`Destination: ${trip.destination}`, 12);
+    addText(
+      `Travel Dates: ${tripDates.start || "Not specified"} - ${
+        tripDates.end || "Not specified"
+      }`,
+      12,
+    );
+    addText(`Travelers: ${trip.travelers || 1}`, 12);
+    addText(`Budget: $${trip.budget || 0}`, 12);
+
+    // Itinerary
+    if (normalizedItinerary.length > 0) {
+      y += 5;
+
+      pdf.setFont("helvetica", "bold");
+      addText("AI Itinerary", 16, 8);
+      pdf.setFont("helvetica", "normal");
+
+      normalizedItinerary.forEach((day, index) => {
+        addText(`Day ${index + 1}`, 13);
+
+        addText(`Morning: ${day.morning || "No activity"}`);
+        addText(`Afternoon: ${day.afternoon || "No activity"}`);
+        addText(`Evening: ${day.evening || "No activity"}`);
+
+        y += 3;
+      });
+    }
+
+    // Budget Plan
+    if (trip.budgetPlan) {
+      y += 5;
+
+      pdf.setFont("helvetica", "bold");
+      addText("Budget Plan", 16, 8);
+      pdf.setFont("helvetica", "normal");
+
+      addText(`Accommodation: $${Number(trip.budgetPlan.accommodation || 0)}`);
+
+      addText(`Food: $${Number(trip.budgetPlan.food || 0)}`);
+
+      addText(
+        `Transportation: $${Number(trip.budgetPlan.transportation || 0)}`,
+      );
+
+      addText(`Activities: $${Number(trip.budgetPlan.activities || 0)}`);
+
+      addText(`Estimated Total: $${Number(trip.budgetPlan.total || 0)}`);
+
+      if (trip.budgetPlan.summary) {
+        addText(`Summary: ${trip.budgetPlan.summary}`);
+      }
+    }
+
+    // Packing List
+    if (Array.isArray(trip.packingList) && trip.packingList.length > 0) {
+      y += 5;
+
+      pdf.setFont("helvetica", "bold");
+      addText("Packing List", 16, 8);
+      pdf.setFont("helvetica", "normal");
+
+      trip.packingList.forEach((item) => {
+        const text =
+          typeof item === "string"
+            ? item
+            : item?.item || item?.name || String(item);
+
+        addText(`• ${text}`);
+      });
+    }
+
+    const fileName = (trip.destination || "travelgenie-trip")
+      .replace(/\s+/g, "-")
+      .toLowerCase();
+
+    pdf.save(`${fileName}-trip.pdf`);
+  };
+
+  // ======================================================
+  // FIND CURRENT TRIP
+  // ======================================================
+
+  const trip = trips?.find((item) => String(item.id) === String(id));
 
   // ======================================================
   // NORMALIZE ITINERARY
   // ======================================================
 
-  // This hook must run on every render.
   const normalizedItinerary = useMemo(() => {
     if (!Array.isArray(trip?.itinerary)) {
       return [];
     }
 
-    return trip.itinerary.map((day, index) => ({
-      ...day,
-      title: `Day ${index + 1}`,
+    return trip.itinerary.map((day) => ({
+      morning: day?.morning || "",
+      afternoon: day?.afternoon || "",
+      evening: day?.evening || "",
     }));
   }, [trip?.itinerary]);
 
   // ======================================================
-  // CALCULATE TRIP DAYS
+  // CALCULATE TRIP DATES
   // ======================================================
 
   const tripDates = useMemo(() => {
-    const start = trip?.dates?.start || trip?.start_date || null;
-    const end = trip?.dates?.end || trip?.end_date || null;
+    const start =
+      trip?.dates?.start || trip?.start_date || trip?.startDate || null;
+
+    const end = trip?.dates?.end || trip?.end_date || trip?.endDate || null;
 
     if (!start || !end) {
       return {
@@ -163,6 +262,8 @@ function TripDetails() {
     trip?.dates?.end,
     trip?.start_date,
     trip?.end_date,
+    trip?.startDate,
+    trip?.endDate,
     normalizedItinerary.length,
   ]);
 
@@ -171,6 +272,8 @@ function TripDetails() {
   // ======================================================
 
   const generateItinerary = async () => {
+    if (!trip) return;
+
     try {
       setAiLoading(true);
       setAiError("");
@@ -204,8 +307,6 @@ Use exactly this structure:
 ]
 
 Do not include a title or day number.
-The application will automatically create Day 1, Day 2, Day 3, etc.
-
 Do not include markdown.
 Do not include explanations outside the JSON.
 `;
@@ -216,7 +317,6 @@ Do not include explanations outside the JSON.
         throw new Error("AI returned an invalid itinerary.");
       }
 
-      // Make sure itinerary never exceeds the actual trip duration.
       const limitedItinerary = itinerary
         .slice(0, tripDates.days)
         .map((day) => ({
@@ -260,6 +360,7 @@ Do not include explanations outside the JSON.
   const cancelEditingItinerary = () => {
     setEditedItinerary([]);
     setEditingItinerary(false);
+    setAiError("");
   };
 
   // ======================================================
@@ -284,17 +385,18 @@ Do not include explanations outside the JSON.
   // ======================================================
 
   const saveItinerary = async () => {
+    if (!trip) return;
+
     try {
       setSavingItinerary(true);
       setAiError("");
 
-      // Keep the same number of days.
       const cleanedItinerary = editedItinerary
         .slice(0, tripDates.days)
         .map((day) => ({
-          morning: day.morning || "",
-          afternoon: day.afternoon || "",
-          evening: day.evening || "",
+          morning: day?.morning || "",
+          afternoon: day?.afternoon || "",
+          evening: day?.evening || "",
         }));
 
       await updateTrip(trip.id, {
@@ -317,6 +419,8 @@ Do not include explanations outside the JSON.
   // ======================================================
 
   const regenerateDay = async (dayIndex) => {
+    if (!trip) return;
+
     try {
       setRegeneratingDay(dayIndex);
       setAiError("");
@@ -356,7 +460,11 @@ Do not include explanations.
         throw new Error("AI returned an invalid day.");
       }
 
-      const currentItinerary = [...normalizedItinerary];
+      const currentItinerary = normalizedItinerary.map((day) => ({
+        morning: day.morning || "",
+        afternoon: day.afternoon || "",
+        evening: day.evening || "",
+      }));
 
       currentItinerary[dayIndex] = {
         morning: newDay.morning || "",
@@ -364,15 +472,9 @@ Do not include explanations.
         evening: newDay.evening || "",
       };
 
-      const cleanedItinerary = currentItinerary.map((day) => ({
-        morning: day.morning || "",
-        afternoon: day.afternoon || "",
-        evening: day.evening || "",
-      }));
-
       await updateTrip(trip.id, {
         ...trip,
-        itinerary: cleanedItinerary,
+        itinerary: currentItinerary,
       });
     } catch (error) {
       console.error("Individual day regeneration failed:", error);
@@ -388,6 +490,8 @@ Do not include explanations.
   // ======================================================
 
   const generatePackingList = async () => {
+    if (!trip) return;
+
     try {
       setPackingLoading(true);
       setPackingError("");
@@ -458,100 +562,6 @@ Return only the JSON array.
   };
 
   // ======================================================
-  // TOGGLE INTEREST
-  // ======================================================
-
-  const toggleInterest = (interest) => {
-    setSelectedInterests((current) =>
-      current.includes(interest)
-        ? current.filter((item) => item !== interest)
-        : [...current, interest],
-    );
-  };
-
-  // ======================================================
-  // GENERATE AI RECOMMENDATIONS
-  // ======================================================
-
-  const generateRecommendations = async () => {
-    try {
-      setRecommendationsLoading(true);
-      setRecommendationsError("");
-
-      const interestText =
-        selectedInterests.length > 0
-          ? selectedInterests.join(", ")
-          : "General travel, popular attractions, local experiences, food, and culture";
-
-      const prompt = `
-Create personalized travel recommendations for this trip.
-
-Destination: ${trip.destination}
-
-Travel dates:
-${tripDates.start || "Not specified"} to ${tripDates.end || "Not specified"}
-
-Number of travelers: ${trip.travelers || 1}
-
-Budget: $${trip.budget || 0}
-
-Traveler interests:
-${interestText}
-
-Give practical and interesting recommendations based on the destination, budget, and interests.
-
-Return ONLY valid JSON using exactly this structure:
-
-{
-  "places": [
-    "Place recommendation"
-  ],
-  "activities": [
-    "Activity recommendation"
-  ],
-  "food": [
-    "Food or dining recommendation"
-  ],
-  "tips": [
-    "Helpful travel tip"
-  ]
-}
-
-Give 3 to 5 useful recommendations in each category.
-
-Do not include markdown.
-Do not include explanations outside the JSON.
-
-Return only the JSON object.
-`;
-
-      const recommendations = await generateAIResponse(prompt);
-
-      if (
-        !recommendations ||
-        typeof recommendations !== "object" ||
-        Array.isArray(recommendations)
-      ) {
-        throw new Error("AI returned invalid recommendations.");
-      }
-
-      await updateTrip(trip.id, {
-        ...trip,
-        recommendations,
-        recommendationInterests: selectedInterests,
-      });
-    } catch (error) {
-      console.error("Recommendations generation failed:", error);
-
-      setRecommendationsError(
-        "Failed to generate recommendations. Please try again.",
-      );
-    } finally {
-      setRecommendationsLoading(false);
-    }
-  };
-
-  // ======================================================
   // WEATHER
   // ======================================================
 
@@ -562,12 +572,12 @@ Return only the JSON object.
       setWeatherLoading(true);
       setWeatherError("");
 
-      // First find the destination coordinates.
-      const geocodeResponse = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-          trip.destination,
-        )}&count=1&language=en&format=json`,
-      );
+      const geocodeUrl =
+        `https://geocoding-api.open-meteo.com/v1/search` +
+        `?name=${encodeURIComponent(trip.destination)}` +
+        `&count=1&language=en&format=json`;
+
+      const geocodeResponse = await fetch(geocodeUrl);
 
       if (!geocodeResponse.ok) {
         throw new Error("Unable to find destination.");
@@ -581,9 +591,14 @@ Return only the JSON object.
 
       const location = geocodeData.results[0];
 
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto`,
-      );
+      const weatherUrl =
+        `https://api.open-meteo.com/v1/forecast` +
+        `?latitude=${location.latitude}` +
+        `&longitude=${location.longitude}` +
+        `&current=temperature_2m,weather_code,wind_speed_10m` +
+        `&timezone=auto`;
+
+      const weatherResponse = await fetch(weatherUrl);
 
       if (!weatherResponse.ok) {
         throw new Error("Unable to load weather.");
@@ -600,18 +615,23 @@ Return only the JSON object.
       });
     } catch (error) {
       console.error("Weather loading failed:", error);
+
       setWeatherError("Weather information is currently unavailable.");
+
+      setWeather(null);
     } finally {
       setWeatherLoading(false);
     }
   };
 
-  // Load weather when the trip is available.
+  // ======================================================
+  // LOAD WEATHER WHEN TRIP IS AVAILABLE
+  // ======================================================
+
   useEffect(() => {
     if (trip?.destination) {
       loadWeather();
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trip?.destination]);
 
@@ -619,35 +639,22 @@ Return only the JSON object.
   // WEATHER DESCRIPTION
   // ======================================================
 
-  // Your existing weather code continues here...
-
   const getWeatherDescription = (code) => {
     if (code === 0) return "Clear sky";
-
-    if ([1, 2, 3].includes(code)) {
-      return "Partly cloudy";
-    }
-
-    if ([45, 48].includes(code)) {
-      return "Foggy";
-    }
-
+    if ([1, 2, 3].includes(code)) return "Partly cloudy";
+    if ([45, 48].includes(code)) return "Foggy";
     if ([51, 53, 55, 56, 57].includes(code)) {
       return "Drizzle";
     }
-
     if ([61, 63, 65, 66, 67].includes(code)) {
       return "Rain";
     }
-
     if ([71, 73, 75, 77].includes(code)) {
       return "Snow";
     }
-
     if ([80, 81, 82].includes(code)) {
       return "Rain showers";
     }
-
     if ([95, 96, 99].includes(code)) {
       return "Thunderstorm";
     }
@@ -660,6 +667,8 @@ Return only the JSON object.
   // ======================================================
 
   const generateBudgetPlan = async () => {
+    if (!trip) return;
+
     try {
       setBudgetLoading(true);
       setBudgetError("");
@@ -690,7 +699,9 @@ Return ONLY valid JSON using exactly this structure:
 }
 
 All amounts must be numbers.
+
 Estimate realistic costs for the destination.
+
 Keep the estimate close to the user's budget when possible.
 
 Do not include markdown.
@@ -725,6 +736,8 @@ Do not include explanations outside the JSON.
   // ======================================================
 
   const shareTrip = async () => {
+    if (!trip) return;
+
     try {
       const shareUrl = window.location.href;
 
@@ -763,7 +776,14 @@ Do not include explanations outside the JSON.
   // ======================================================
 
   if (loading) {
-    return <div className="text-gray-900 dark:text-white">Loading trip...</div>;
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <div className="flex items-center gap-3 text-gray-600 dark:text-white/70">
+          <RefreshCw size={20} className="animate-spin" />
+          Loading trip...
+        </div>
+      </div>
+    );
   }
 
   // ======================================================
@@ -783,7 +803,7 @@ Do not include explanations outside the JSON.
 
         <button
           onClick={() => navigate("/dashboard/trips")}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 text-white hover:bg-cyan-600 transition"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 text-white transition hover:bg-cyan-600"
         >
           <ArrowLeft size={18} />
           Back to Trips
@@ -798,65 +818,71 @@ Do not include explanations outside the JSON.
 
   return (
     <div className="space-y-8">
-      {/* ==================================================
-          BACK BUTTON
-      ================================================== */}
+      {/* BACK BUTTON */}
 
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 rounded-xl px-4 py-2.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white hover:bg-gray-100 hover:text-cyan-500 dark:hover:bg-white/20 transition"
+        className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-gray-700 transition hover:bg-gray-100 hover:text-cyan-500 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
       >
         <ArrowLeft size={19} />
         Back
       </button>
 
-      {/* ==================================================
-          TRIP HEADER
-      ================================================== */}
+      {/* TRIP HEADER */}
 
       <GlassCard className="p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row justify-between gap-5">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-500/10 px-3 py-1.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 mb-3">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-cyan-500/10 px-3 py-1.5 text-sm font-medium text-cyan-600 dark:text-cyan-400">
               <MapPin size={16} />
               Trip Destination
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
               {trip.title || trip.destination}
             </h1>
 
-            <div className="flex items-center gap-2 mt-3 text-gray-600 dark:text-white/70">
+            <div className="mt-3 flex items-center gap-2 text-gray-600 dark:text-white/70">
               <MapPin size={18} className="text-cyan-500" />
-
               <span>{trip.destination}</span>
             </div>
           </div>
 
           <div className="flex items-start gap-2">
-            {/* Share */}
+            {/* Download PDF */}
+            <button
+              onClick={downloadTripPDF}
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 transition hover:scale-105 dark:bg-white/10"
+              aria-label="Download trip as PDF"
+              title="Download PDF"
+            >
+              <FileDown
+                size={21}
+                className="text-gray-500 dark:text-white/70"
+              />
+            </button>
 
             <button
               onClick={shareTrip}
-              className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-white/10 hover:scale-105 transition"
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 transition hover:scale-105 dark:bg-white/10"
               aria-label="Share trip"
               title="Share trip"
             >
               <Share2 size={21} className="text-gray-500 dark:text-white/70" />
             </button>
 
-            {/* Favorite */}
-
+            {/* Label */}
             <button
               onClick={() => toggleFavorite(trip.id)}
-              className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-white/10 hover:scale-105 transition"
-              aria-label="Toggle favorite"
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 transition hover:scale-105 dark:bg-white/10"
+              aria-label="Label trip"
+              title={trip.favorite ? "Remove label" : "Label trip"}
             >
-              <Heart
-                size={22}
+              <Tag
+                size={21}
                 className={
                   trip.favorite
-                    ? "fill-red-500 text-red-500"
+                    ? "fill-cyan-500 text-cyan-500"
                     : "text-gray-400 dark:text-white/60"
                 }
               />
@@ -865,14 +891,12 @@ Do not include explanations outside the JSON.
         </div>
 
         {shareMessage && (
-          <div className="mt-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20 px-4 py-3 text-sm text-cyan-600 dark:text-cyan-400">
+          <div className="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-600 dark:text-cyan-400">
             {shareMessage}
           </div>
         )}
 
-        {/* Trip Information */}
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Info
             icon={<Calendar size={19} />}
             label="Travel Dates"
@@ -895,9 +919,9 @@ Do not include explanations outside the JSON.
         </div>
       </GlassCard>
 
-      {/* ==================================================
-          WEATHER
-      ================================================== */}
+      <SectionDivider />
+
+      {/* WEATHER */}
 
       <section>
         <SectionHeader
@@ -915,7 +939,7 @@ Do not include explanations outside the JSON.
           </GlassCard>
         ) : weather ? (
           <GlassCard className="p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <div className="flex items-center gap-2">
                   <MapPin size={18} className="text-cyan-500" />
@@ -939,7 +963,7 @@ Do not include explanations outside the JSON.
               <div className="flex items-center gap-5">
                 <div className="text-right">
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {weather.temperature}°C
+                    {weather.temperature ?? "--"}°C
                   </p>
 
                   <p className="text-xs text-gray-500 dark:text-white/50">
@@ -947,7 +971,7 @@ Do not include explanations outside the JSON.
                   </p>
                 </div>
 
-                <div className="hidden sm:block h-10 w-px bg-gray-200 dark:bg-white/10" />
+                <div className="hidden h-10 w-px bg-gray-200 dark:bg-white/10 sm:block" />
 
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -955,7 +979,7 @@ Do not include explanations outside the JSON.
                   </p>
 
                   <p className="text-sm text-gray-500 dark:text-white/60">
-                    {weather.windSpeed} km/h
+                    {weather.windSpeed ?? "--"} km/h
                   </p>
                 </div>
               </div>
@@ -969,7 +993,7 @@ Do not include explanations outside the JSON.
 
             <button
               onClick={loadWeather}
-              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-white/10 px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/20 transition"
+              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             >
               <RefreshCw size={16} />
               Try Again
@@ -978,9 +1002,9 @@ Do not include explanations outside the JSON.
         )}
       </section>
 
-      {/* ==================================================
-          AI ITINERARY
-      ================================================== */}
+      <SectionDivider />
+
+      {/* AI ITINERARY */}
 
       <section>
         <SectionHeader
@@ -992,7 +1016,7 @@ Do not include explanations outside the JSON.
               {!editingItinerary && normalizedItinerary.length > 0 && (
                 <button
                   onClick={startEditingItinerary}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 dark:bg-white/10 px-4 py-2.5 text-sm text-gray-700 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-white/20 transition"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                 >
                   <Edit size={17} />
                   Edit
@@ -1003,10 +1027,9 @@ Do not include explanations outside the JSON.
                 <button
                   onClick={generateItinerary}
                   disabled={aiLoading}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm text-white font-medium hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Sparkles size={17} />
-
                   {aiLoading
                     ? "Generating..."
                     : normalizedItinerary.length > 0
@@ -1020,7 +1043,7 @@ Do not include explanations outside the JSON.
                   <button
                     onClick={cancelEditingItinerary}
                     disabled={savingItinerary}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 dark:bg-white/10 px-4 py-2.5 text-sm text-gray-700 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-white/20 disabled:opacity-50 transition"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-200 disabled:opacity-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                   >
                     <X size={17} />
                     Cancel
@@ -1029,10 +1052,9 @@ Do not include explanations outside the JSON.
                   <button
                     onClick={saveItinerary}
                     disabled={savingItinerary}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm text-white font-medium hover:bg-cyan-600 disabled:opacity-50 transition"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:opacity-50"
                   >
                     <Save size={17} />
-
                     {savingItinerary ? "Saving..." : "Save Changes"}
                   </button>
                 </>
@@ -1048,11 +1070,9 @@ Do not include explanations outside the JSON.
             {(editingItinerary ? editedItinerary : normalizedItinerary).map(
               (day, index) => (
                 <GlassCard key={index} className="p-4 sm:p-5">
-                  {/* ONE day number only */}
-
-                  <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-sm font-bold">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-sm font-bold text-white">
                         {index + 1}
                       </div>
 
@@ -1071,7 +1091,7 @@ Do not include explanations outside the JSON.
                       <button
                         onClick={() => regenerateDay(index)}
                         disabled={regeneratingDay === index || aiLoading}
-                        className="inline-flex items-center gap-2 rounded-lg bg-gray-100 dark:bg-white/10 px-3 py-2 text-xs font-medium text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/20 disabled:opacity-50 transition"
+                        className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200 disabled:opacity-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                       >
                         <RefreshCw
                           size={15}
@@ -1153,103 +1173,9 @@ Do not include explanations outside the JSON.
         )}
       </section>
 
-      {/* ==================================================
-          AI RECOMMENDATIONS
-      ================================================== */}
+      <SectionDivider />
 
-      <section>
-        <SectionHeader
-          icon={<Sparkles size={21} />}
-          title="AI Recommendations"
-          description="Personalized ideas based on your interests."
-          actions={
-            <button
-              onClick={generateRecommendations}
-              disabled={recommendationsLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm text-white font-medium hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              <Sparkles size={17} />
-
-              {recommendationsLoading
-                ? "Generating..."
-                : trip.recommendations
-                  ? "Regenerate with AI"
-                  : "Generate with AI"}
-            </button>
-          }
-        />
-
-        {/* Interests */}
-
-        <GlassCard className="p-4 sm:p-5 mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles size={17} className="text-cyan-500" />
-
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              What are you interested in?
-            </h3>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {interests.map((interest) => {
-              const selected = selectedInterests.includes(interest);
-
-              return (
-                <button
-                  key={interest}
-                  onClick={() => toggleInterest(interest)}
-                  className={`rounded-full px-3.5 py-2 text-sm font-medium border transition ${
-                    selected
-                      ? "bg-cyan-500 text-white border-cyan-500"
-                      : "bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-white/70 border-gray-200 dark:border-white/10 hover:border-cyan-500 hover:text-cyan-500"
-                  }`}
-                >
-                  {interest}
-                </button>
-              );
-            })}
-          </div>
-        </GlassCard>
-
-        {recommendationsError && (
-          <p className="mb-4 text-sm text-red-500">{recommendationsError}</p>
-        )}
-
-        {trip.recommendations ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <RecommendationCard
-              title="Places to Visit"
-              items={trip.recommendations.places}
-            />
-
-            <RecommendationCard
-              title="Activities & Experiences"
-              items={trip.recommendations.activities}
-            />
-
-            <RecommendationCard
-              title="Food & Dining"
-              items={trip.recommendations.food}
-            />
-
-            <RecommendationCard
-              title="Travel Tips"
-              items={trip.recommendations.tips}
-            />
-          </div>
-        ) : (
-          <GlassCard className="p-5">
-            <p className="text-sm text-gray-600 dark:text-white/70">
-              Select your interests and generate personalized recommendations
-              with AI.
-            </p>
-          </GlassCard>
-        )}
-      </section>
-
-      {/* ==================================================
-          BUDGET PLANNING
-      ================================================== */}
+      {/* BUDGET PLANNING */}
 
       <section>
         <SectionHeader
@@ -1260,7 +1186,7 @@ Do not include explanations outside the JSON.
             <button
               onClick={generateBudgetPlan}
               disabled={budgetLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm text-white font-medium hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Sparkles size={17} />
 
@@ -1278,7 +1204,7 @@ Do not include explanations outside the JSON.
         )}
 
         {trip.budgetPlan ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <BudgetCard
               icon={<Hotel size={18} />}
               title="Accommodation"
@@ -1314,14 +1240,14 @@ Do not include explanations outside the JSON.
 
         {trip.budgetPlan?.total !== undefined && (
           <GlassCard className="mt-3 p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
                 <p className="text-sm text-gray-500 dark:text-white/60">
                   Estimated Total
                 </p>
 
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  ${trip.budgetPlan.total}
+                  ${Number(trip.budgetPlan.total || 0)}
                 </p>
               </div>
 
@@ -1342,9 +1268,9 @@ Do not include explanations outside the JSON.
         )}
       </section>
 
-      {/* ==================================================
-          PACKING LIST
-      ================================================== */}
+      <SectionDivider />
+
+      {/* PACKING LIST */}
 
       <section>
         <SectionHeader
@@ -1355,7 +1281,7 @@ Do not include explanations outside the JSON.
             <button
               onClick={generatePackingList}
               disabled={packingLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm text-white font-medium hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Sparkles size={17} />
 
@@ -1373,16 +1299,18 @@ Do not include explanations outside the JSON.
         )}
 
         {Array.isArray(trip.packingList) && trip.packingList.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {trip.packingList.map((item, index) => (
               <GlassCard key={index} className="p-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center shrink-0 w-7 h-7 rounded-full bg-cyan-500/10 text-cyan-500">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-500">
                     <Check size={15} />
                   </div>
 
                   <p className="text-sm text-gray-800 dark:text-white">
-                    {item}
+                    {typeof item === "string"
+                      ? item
+                      : item?.item || item?.name || String(item)}
                   </p>
                 </div>
               </GlassCard>
@@ -1402,24 +1330,32 @@ Do not include explanations outside the JSON.
 }
 
 // ======================================================
+// SECTION DIVIDER
+// ======================================================
+
+function SectionDivider() {
+  return <div className="border-t border-gray-200 pt-1 dark:border-white/10" />;
+}
+
+// ======================================================
 // SECTION HEADER
 // ======================================================
 
 function SectionHeader({ icon, title, description, actions }) {
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-500 shrink-0">
+    <div className="mb-4 flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500">
         {icon}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
               {title}
             </h2>
 
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-white/60">
+            <p className="text-xs text-gray-500 dark:text-white/60 sm:text-sm">
               {description}
             </p>
           </div>
@@ -1437,7 +1373,7 @@ function SectionHeader({ icon, title, description, actions }) {
 
 function Info({ icon, label, text }) {
   return (
-    <div className="rounded-xl bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/5 p-3.5">
+    <div className="rounded-xl border border-gray-200 bg-gray-100 p-3.5 dark:border-white/5 dark:bg-white/10">
       <div className="flex items-center gap-2 text-cyan-500">
         {icon}
 
@@ -1455,8 +1391,8 @@ function Info({ icon, label, text }) {
 
 function Activity({ icon, label, text }) {
   return (
-    <div className="flex gap-3 rounded-lg bg-gray-50 dark:bg-white/5 p-3">
-      <div className="text-cyan-500 mt-0.5 shrink-0">{icon}</div>
+    <div className="flex gap-3 rounded-lg bg-gray-50 p-3 dark:bg-white/5">
+      <div className="mt-0.5 shrink-0 text-cyan-500">{icon}</div>
 
       <div className="min-w-0">
         <p className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -1477,8 +1413,8 @@ function Activity({ icon, label, text }) {
 
 function EditableActivity({ icon, label, value, onChange }) {
   return (
-    <div className="rounded-lg bg-gray-50 dark:bg-white/5 p-3">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="rounded-lg bg-gray-50 p-3 dark:bg-white/5">
+      <div className="mb-2 flex items-center gap-2">
         <div className="text-cyan-500">{icon}</div>
 
         <p className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -1488,45 +1424,12 @@ function EditableActivity({ icon, label, value, onChange }) {
 
       <textarea
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         rows={2}
-        className="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-white outline-none resize-none focus:ring-2 focus:ring-cyan-500"
+        className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-cyan-500 dark:border-white/10 dark:bg-white/5 dark:text-white"
         placeholder={`Enter ${label.toLowerCase()} activity...`}
       />
     </div>
-  );
-}
-
-// ======================================================
-// RECOMMENDATION CARD
-// ======================================================
-
-function RecommendationCard({ title, items }) {
-  return (
-    <GlassCard className="p-4">
-      <h3 className="text-base font-bold text-gray-900 dark:text-white">
-        {title}
-      </h3>
-
-      {Array.isArray(items) && items.length > 0 ? (
-        <ul className="mt-3 space-y-2">
-          {items.map((item, index) => (
-            <li
-              key={index}
-              className="flex items-start gap-2 text-sm text-gray-700 dark:text-white/75"
-            >
-              <Sparkles size={15} className="shrink-0 mt-0.5 text-cyan-500" />
-
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-2 text-sm text-gray-500 dark:text-white/60">
-          No recommendations available.
-        </p>
-      )}
-    </GlassCard>
   );
 }
 
