@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://travelgenie-backend-fcvw.onrender.com/api/",
+  baseURL: "https://travelgenie-backend-fcvw.onrender.com/api/users/register/",
 });
 
 api.interceptors.request.use(
